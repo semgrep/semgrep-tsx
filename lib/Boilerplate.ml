@@ -943,7 +943,23 @@ and map_declaration (env : env) (x : CST.declaration) =
       | `Lexi_decl x -> map_lexical_declaration env x
       | `Var_decl x -> map_variable_declaration env x
       )
-  | `Func_sign x -> map_function_signature env x
+  | `Func_sign (v1, v2, v3, v4, v5) ->
+      let v1 =
+        (match v1 with
+        | Some tok -> token env tok (* "async" *)
+        | None -> todo env ())
+      in
+      let v2 = token env v2 (* "function" *) in
+      let v3 = token env v3 (* identifier *) in
+      let v4 = map_call_signature_ env v4 in
+      let v5 =
+        (match v5 with
+        | `Choice_auto_semi x -> map_semicolon env x
+        | `Func_sign_auto_semi tok ->
+            token env tok (* function_signature_automatic_semicolon *)
+        )
+      in
+      todo env (v1, v2, v3, v4, v5)
   | `Abst_class_decl (v1, v2, v3, v4, v5, v6, v7) ->
       let v1 = List.map (map_decorator env) v1 in
       let v2 = token env v2 (* "abstract" *) in
@@ -1170,11 +1186,18 @@ and map_export_statement (env : env) (x : CST.export_statement) =
           let v3 =
             (match v3 with
             | `Decl x -> map_declaration env x
-            | `Defa_exp_choice_auto_semi (v1, v2, v3) ->
+            | `Defa_choice_decl (v1, v2) ->
                 let v1 = token env v1 (* "default" *) in
-                let v2 = map_expression env v2 in
-                let v3 = map_semicolon env v3 in
-                todo env (v1, v2, v3)
+                let v2 =
+                  (match v2 with
+                  | `Decl x -> map_declaration env x
+                  | `Exp_choice_auto_semi (v1, v2) ->
+                      let v1 = map_expression env v1 in
+                      let v2 = map_semicolon env v2 in
+                      todo env (v1, v2)
+                  )
+                in
+                todo env (v1, v2)
             )
           in
           todo env (v1, v2, v3)
@@ -1197,11 +1220,6 @@ and map_export_statement (env : env) (x : CST.export_statement) =
       let v4 = token env v4 (* identifier *) in
       let v5 = map_semicolon env v5 in
       todo env (v1, v2, v3, v4, v5)
-  | `Export_defa_func_sign (v1, v2, v3) ->
-      let v1 = token env v1 (* "export" *) in
-      let v2 = token env v2 (* "default" *) in
-      let v3 = map_function_signature env v3 in
-      todo env (v1, v2, v3)
   )
 
 and map_expression (env : env) (x : CST.expression) =
@@ -1444,24 +1462,6 @@ and map_function_declaration (env : env) ((v1, v2, v3, v4, v5, v6) : CST.functio
     | None -> todo env ())
   in
   todo env (v1, v2, v3, v4, v5, v6)
-
-and map_function_signature (env : env) ((v1, v2, v3, v4, v5) : CST.function_signature) =
-  let v1 =
-    (match v1 with
-    | Some tok -> token env tok (* "async" *)
-    | None -> todo env ())
-  in
-  let v2 = token env v2 (* "function" *) in
-  let v3 = token env v3 (* identifier *) in
-  let v4 = map_call_signature_ env v4 in
-  let v5 =
-    (match v5 with
-    | `Choice_auto_semi x -> map_semicolon env x
-    | `Func_sign_auto_semi tok ->
-        token env tok (* function_signature_automatic_semicolon *)
-    )
-  in
-  todo env (v1, v2, v3, v4, v5)
 
 and map_generator_function (env : env) ((v1, v2, v3, v4, v5, v6) : CST.generator_function) =
   let v1 =

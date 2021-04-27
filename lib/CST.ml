@@ -573,7 +573,17 @@ and declaration = [
       | `Lexi_decl of lexical_declaration
       | `Var_decl of variable_declaration
     ]
-  | `Func_sign of function_signature
+  | `Func_sign of (
+        Token.t (* "async" *) option
+      * Token.t (* "function" *)
+      * identifier (*tok*)
+      * call_signature_
+      * [
+            `Choice_auto_semi of semicolon
+          | `Func_sign_auto_semi of
+              function_signature_automatic_semicolon (*tok*)
+        ]
+    )
   | `Abst_class_decl of (
         decorator list (* zero or more *)
       * Token.t (* "abstract" *)
@@ -694,8 +704,12 @@ and export_statement = [
           * Token.t (* "export" *)
           * [
                 `Decl of declaration
-              | `Defa_exp_choice_auto_semi of (
-                    Token.t (* "default" *) * expression * semicolon
+              | `Defa_choice_decl of (
+                    Token.t (* "default" *)
+                  * [
+                        `Decl of declaration
+                      | `Exp_choice_auto_semi of (expression * semicolon)
+                    ]
                 )
             ]
         )
@@ -710,9 +724,6 @@ and export_statement = [
   | `Export_as_name_id_choice_auto_semi of (
         Token.t (* "export" *) * Token.t (* "as" *)
       * Token.t (* "namespace" *) * identifier (*tok*) * semicolon
-    )
-  | `Export_defa_func_sign of (
-        Token.t (* "export" *) * Token.t (* "default" *) * function_signature
     )
 ]
 
@@ -852,18 +863,6 @@ and function_declaration = (
   * call_signature_
   * statement_block
   * automatic_semicolon (*tok*) option
-)
-
-and function_signature = (
-    Token.t (* "async" *) option
-  * Token.t (* "function" *)
-  * identifier (*tok*)
-  * call_signature_
-  * [
-        `Choice_auto_semi of semicolon
-      | `Func_sign_auto_semi of
-          function_signature_automatic_semicolon (*tok*)
-    ]
 )
 
 and generator_function = (
@@ -1673,6 +1672,19 @@ type for_statement (* inlined *) = (
   * expressions option
   * Token.t (* ")" *)
   * statement
+)
+[@@deriving sexp_of]
+
+type function_signature (* inlined *) = (
+    Token.t (* "async" *) option
+  * Token.t (* "function" *)
+  * identifier (*tok*)
+  * call_signature_
+  * [
+        `Choice_auto_semi of semicolon
+      | `Func_sign_auto_semi of
+          function_signature_automatic_semicolon (*tok*)
+    ]
 )
 [@@deriving sexp_of]
 

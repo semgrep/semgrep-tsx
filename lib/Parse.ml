@@ -1262,10 +1262,15 @@ let children_regexps : (string * Run.exp option) list = [
             Token (Name "declaration");
             Seq [
               Token (Literal "default");
-              Token (Name "expression");
               Alt [|
-                Token (Name "automatic_semicolon");
-                Token (Literal ";");
+                Token (Name "declaration");
+                Seq [
+                  Token (Name "expression");
+                  Alt [|
+                    Token (Name "automatic_semicolon");
+                    Token (Literal ";");
+                  |];
+                ];
               |];
             ];
           |];
@@ -1294,11 +1299,6 @@ let children_regexps : (string * Run.exp option) list = [
           Token (Name "automatic_semicolon");
           Token (Literal ";");
         |];
-      ];
-      Seq [
-        Token (Literal "export");
-        Token (Literal "default");
-        Token (Name "function_signature");
       ];
     |];
   );
@@ -6365,20 +6365,36 @@ and trans_export_statement ((kind, body) : mt) : CST.export_statement =
                               trans_declaration (Run.matcher_token v)
                             )
                         | Alt (1, v) ->
-                            `Defa_exp_choice_auto_semi (
+                            `Defa_choice_decl (
                               (match v with
-                              | Seq [v0; v1; v2] ->
+                              | Seq [v0; v1] ->
                                   (
                                     Run.trans_token (Run.matcher_token v0),
-                                    trans_expression (Run.matcher_token v1),
-                                    (match v2 with
+                                    (match v1 with
                                     | Alt (0, v) ->
-                                        `Auto_semi (
-                                          trans_automatic_semicolon (Run.matcher_token v)
+                                        `Decl (
+                                          trans_declaration (Run.matcher_token v)
                                         )
                                     | Alt (1, v) ->
-                                        `SEMI (
-                                          Run.trans_token (Run.matcher_token v)
+                                        `Exp_choice_auto_semi (
+                                          (match v with
+                                          | Seq [v0; v1] ->
+                                              (
+                                                trans_expression (Run.matcher_token v0),
+                                                (match v1 with
+                                                | Alt (0, v) ->
+                                                    `Auto_semi (
+                                                      trans_automatic_semicolon (Run.matcher_token v)
+                                                    )
+                                                | Alt (1, v) ->
+                                                    `SEMI (
+                                                      Run.trans_token (Run.matcher_token v)
+                                                    )
+                                                | _ -> assert false
+                                                )
+                                              )
+                                          | _ -> assert false
+                                          )
                                         )
                                     | _ -> assert false
                                     )
@@ -6450,18 +6466,6 @@ and trans_export_statement ((kind, body) : mt) : CST.export_statement =
                       )
                   | _ -> assert false
                   )
-                )
-            | _ -> assert false
-            )
-          )
-      | Alt (4, v) ->
-          `Export_defa_func_sign (
-            (match v with
-            | Seq [v0; v1; v2] ->
-                (
-                  Run.trans_token (Run.matcher_token v0),
-                  Run.trans_token (Run.matcher_token v1),
-                  trans_function_signature (Run.matcher_token v2)
                 )
             | _ -> assert false
             )
