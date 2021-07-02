@@ -25,6 +25,7 @@ module.exports = grammar({
     $.statement,
     $._expressions,
     $._semicolon,
+    $._identifier,
     $._reserved_identifier,
     $._jsx_attribute,
     $._jsx_element_name,
@@ -100,6 +101,7 @@ module.exports = grammar({
         'export',
         choice(
           seq('*', $._from_clause, $._semicolon),
+          seq($.namespace_import, $._from_clause, $._semicolon),
           seq($.export_clause, $._from_clause, $._semicolon),
           seq($.export_clause, $._semicolon)
         )
@@ -440,7 +442,7 @@ module.exports = grammar({
       $.subscript_expression,
       $.member_expression,
       $.parenthesized_expression,
-      $.identifier,
+      $._identifier,
       alias($._reserved_identifier, $.identifier),
       $.this,
       $.super,
@@ -451,7 +453,6 @@ module.exports = grammar({
       $.true,
       $.false,
       $.null,
-      $.undefined,
       $.import,
       $.object,
       $.array,
@@ -723,7 +724,9 @@ module.exports = grammar({
     member_expression: $ => prec('member', seq(
       field('object', choice($.expression, $.primary_expression)),
       choice('.', '?.'),
-      field('property', alias($.identifier, $.property_identifier))
+      field('property', choice(
+        $.private_property_identifier,
+        alias($.identifier, $.property_identifier)))
     )),
 
     subscript_expression: $ => prec.right('member', seq(
@@ -735,7 +738,7 @@ module.exports = grammar({
     _lhs_expression: $ => choice(
       $.member_expression,
       $.subscript_expression,
-      $.identifier,
+      $._identifier,
       alias($._reserved_identifier, $.identifier),
       $._destructuring_pattern
     ),
@@ -976,10 +979,26 @@ module.exports = grammar({
       ))
     },
 
+    // 'undefined' is syntactically a regular identifier in JavaScript.
+    // However, its main use is as the read-only global variable whose
+    // value is [undefined], for which there's no literal representation
+    // unlike 'null'. We gave it its own rule so it's easy to
+    // highlight in text editors and other applications.
+    _identifier: $ => choice(
+      $.undefined,
+      $.identifier
+    ),
+
     identifier: $ => {
       const alpha = /[^\x00-\x1F\s0-9:;`"'@#.,|^&<=>+\-*/\\%?!~()\[\]{}\uFEFF\u2060\u200B\u00A0]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+\}/
       const alphanumeric = /[^\x00-\x1F\s:;`"'@#.,|^&<=>+\-*/\\%?!~()\[\]{}\uFEFF\u2060\u200B\u00A0]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+\}/
       return token(seq(alpha, repeat(alphanumeric)))
+    },
+
+    private_property_identifier: $ => {
+      const alpha = /[^\x00-\x1F\s0-9:;`"'@#.,|^&<=>+\-*/\\%?!~()\[\]{}\uFEFF\u2060\u200B\u00A0]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+\}/
+      const alphanumeric = /[^\x00-\x1F\s:;`"'@#.,|^&<=>+\-*/\\%?!~()\[\]{}\uFEFF\u2060\u200B\u00A0]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+\}/
+      return token(seq('#', alpha, repeat(alphanumeric)))
     },
 
     meta_property: $ => seq('new', '.', 'target'),
@@ -1031,12 +1050,12 @@ module.exports = grammar({
       '{',
       repeat(choice(
         seq(field('member', $.method_definition), optional(';')),
-        seq(field('member', $.public_field_definition), $._semicolon)
+        seq(field('member', $.field_definition), $._semicolon)
       )),
       '}'
     ),
 
-    public_field_definition: $ => seq(
+    field_definition: $ => seq(
       repeat(field('decorator', $.decorator)),
       optional('static'),
       field('property', $._property_name),
@@ -1097,6 +1116,7 @@ module.exports = grammar({
         $.identifier,
         $._reserved_identifier
       ), $.property_identifier),
+      $.private_property_identifier,
       $.string,
       $.number,
       $.computed_property_name
