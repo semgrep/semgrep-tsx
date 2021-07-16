@@ -47,6 +47,7 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Literal "void");
     |];
   );
+  "unescaped_single_string_fragment", None;
   "true", None;
   "template_chars", None;
   "super", None;
@@ -79,6 +80,7 @@ let children_regexps : (string * Run.exp option) list = [
   "escape_sequence", None;
   "null", None;
   "false", None;
+  "unescaped_double_string_fragment", None;
   "automatic_semicolon", None;
   "import", None;
   "import_export_specifier",
@@ -178,7 +180,7 @@ let children_regexps : (string * Run.exp option) list = [
         Token (Literal "\"");
         Repeat (
           Alt [|
-            Nothing;
+            Token (Name "unescaped_double_string_fragment");
             Token (Name "escape_sequence");
           |];
         );
@@ -188,7 +190,7 @@ let children_regexps : (string * Run.exp option) list = [
         Token (Literal "'");
         Repeat (
           Alt [|
-            Nothing;
+            Token (Name "unescaped_single_string_fragment");
             Token (Name "escape_sequence");
           |];
         );
@@ -3402,6 +3404,11 @@ let trans_predefined_type ((kind, body) : mt) : CST.predefined_type =
       )
   | Leaf _ -> assert false
 
+let trans_unescaped_single_string_fragment ((kind, body) : mt) : CST.unescaped_single_string_fragment =
+  match body with
+  | Leaf v -> v
+  | Children _ -> assert false
+
 
 
 let trans_true_ ((kind, body) : mt) : CST.true_ =
@@ -3514,6 +3521,11 @@ let trans_null ((kind, body) : mt) : CST.null =
   | Children _ -> assert false
 
 let trans_false_ ((kind, body) : mt) : CST.false_ =
+  match body with
+  | Leaf v -> v
+  | Children _ -> assert false
+
+let trans_unescaped_double_string_fragment ((kind, body) : mt) : CST.unescaped_double_string_fragment =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3729,7 +3741,7 @@ let trans_string_ ((kind, body) : mt) : CST.string_ =
   | Children v ->
       (match v with
       | Alt (0, v) ->
-          `DQUOT_rep_choice_blank_DQUOT (
+          `DQUOT_rep_choice_unes_double_str_frag_DQUOT (
             (match v with
             | Seq [v0; v1; v2] ->
                 (
@@ -3738,8 +3750,8 @@ let trans_string_ ((kind, body) : mt) : CST.string_ =
                     (fun v ->
                       (match v with
                       | Alt (0, v) ->
-                          `Blank (
-                            Run.nothing v
+                          `Unes_double_str_frag (
+                            trans_unescaped_double_string_fragment (Run.matcher_token v)
                           )
                       | Alt (1, v) ->
                           `Esc_seq (
@@ -3756,7 +3768,7 @@ let trans_string_ ((kind, body) : mt) : CST.string_ =
             )
           )
       | Alt (1, v) ->
-          `SQUOT_rep_choice_blank_SQUOT (
+          `SQUOT_rep_choice_unes_single_str_frag_SQUOT (
             (match v with
             | Seq [v0; v1; v2] ->
                 (
@@ -3765,8 +3777,8 @@ let trans_string_ ((kind, body) : mt) : CST.string_ =
                     (fun v ->
                       (match v with
                       | Alt (0, v) ->
-                          `Blank (
-                            Run.nothing v
+                          `Unes_single_str_frag (
+                            trans_unescaped_single_string_fragment (Run.matcher_token v)
                           )
                       | Alt (1, v) ->
                           `Esc_seq (

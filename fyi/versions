@@ -1,6 +1,6 @@
 File: semgrep-grammars/src/tree-sitter-javascript/LICENSE
 Git repo name: tree-sitter-javascript
-Latest commit in repo: ae9bc67be79de1c46e97ac0d2c6dba01f6a3a963
+Latest commit in repo: 2c5b138ea488259dbf11a34595042eb261965259
 Last change in file:
   commit 236a8dc0e5116ca1aca483b1a90df07f4bf3177e
   Author: Max Brunsfeld <maxbrunsfeld@gmail.com>
@@ -10,17 +10,18 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-javascript/grammar.js
 Git repo name: tree-sitter-javascript
-Latest commit in repo: ae9bc67be79de1c46e97ac0d2c6dba01f6a3a963
+Latest commit in repo: 2c5b138ea488259dbf11a34595042eb261965259
 Last change in file:
-  commit d05098173c27e077224bf7f5f0a6fc504e51a959
+  commit fc5bcbc8e9b1b6802f8274245ec7af12fb98a897
   Author: Martin Jambon <martin@returntocorp.com>
-  Date:   Thu Jul 1 00:50:49 2021 -0700
+  Date:   Sat Jul 3 02:04:37 2021 -0700
   
-      Tell the full story about 'undefined'.
+      Give a name to unescaped string fragments so as to obtain a node in the  CST.
+      (workaround for https://github.com/tree-sitter/tree-sitter/issues/1156)
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/LICENSE
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 80383c0b9eaf1bd6f950f9d87dce56dc9630fca7
+Latest commit in repo: fd08586b72f2ba8776d865b32aca561285c10cfd
 Last change in file:
   commit 4380c6679db3af5c2c641b83fa41329479b1d5dd
   Author: Max Brunsfeld <maxbrunsfeld@gmail.com>
@@ -30,7 +31,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/common/define-grammar.js
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 80383c0b9eaf1bd6f950f9d87dce56dc9630fca7
+Latest commit in repo: fd08586b72f2ba8776d865b32aca561285c10cfd
 Last change in file:
   commit 2877a6a99ac90c92609267f8fb768555aa3338fd
   Author: Martin Jambon <martin@returntocorp.com>
@@ -41,7 +42,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/typescript/grammar.js
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 80383c0b9eaf1bd6f950f9d87dce56dc9630fca7
+Latest commit in repo: fd08586b72f2ba8776d865b32aca561285c10cfd
 Last change in file:
   commit 4312b355b21710839110f934e240c7761383c86b
   Author: Nathan Sobo <nathan@github.com>
@@ -51,7 +52,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/semgrep-typescript/typescript/grammar.js
 Git repo name: ocaml-tree-sitter-semgrep
-Latest commit in repo: 1d20c4597ab75b77072e1b122a0efba0e753111a
+Latest commit in repo: 23250c9fd48238902c044320079fcb903a3e42a2
 Last change in file:
   commit 1cfa0a2c63a1218cf7752cb1504689eed2511548
   Merge: e5e0c02 dbc2761
@@ -66,7 +67,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/tsx/grammar.js
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 80383c0b9eaf1bd6f950f9d87dce56dc9630fca7
+Latest commit in repo: fd08586b72f2ba8776d865b32aca561285c10cfd
 Last change in file:
   commit 4312b355b21710839110f934e240c7761383c86b
   Author: Nathan Sobo <nathan@github.com>
