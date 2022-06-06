@@ -1,26 +1,34 @@
 File: semgrep-grammars/src/tree-sitter-javascript/LICENSE
 Git repo name: tree-sitter-javascript
-Latest commit in repo: 2c5b138ea488259dbf11a34595042eb261965259
+Latest commit in repo: 785831303ce3d36f5dd8ada7c4c7d63518d4d2f5
 Last change in file:
-  commit 4238b076ad40b02d662c625b4be17f2e5e2d118d
-  Author: Max Brunsfeld <maxbrunsfeld@gmail.com>
-  Date:   Thu May 9 17:45:06 2019 -0700
+  commit 435db852fbeff8fe298e25ad967c634d9698eec0
+  Author: fn ⌃ ⌥ <70830482+FnControlOption@users.noreply.github.com>
+  Date:   Mon Sep 13 13:32:20 2021 -0700
   
-      Use new API to track locals for syntax highlighting
+      Add namespace_export alias (#195)
+      
+      * Add namespace_export alias
+      
+      * Regenerate files
 ---
 File: semgrep-grammars/src/tree-sitter-javascript/grammar.js
 Git repo name: tree-sitter-javascript
-Latest commit in repo: 2c5b138ea488259dbf11a34595042eb261965259
+Latest commit in repo: 785831303ce3d36f5dd8ada7c4c7d63518d4d2f5
 Last change in file:
-  commit 9d505df228b5ec762f746e5374c4fbb705163c0b
-  Author: Martin Jambon <martin@returntocorp.com>
-  Date:   Sat Jul 3 02:54:04 2021 -0700
+  commit 08f70a92f50a2373563d0e1f2a60089a02d19ca4
+  Author: fn ⌃ ⌥ <70830482+FnControlOption@users.noreply.github.com>
+  Date:   Mon Sep 20 12:40:57 2021 -0700
   
-      Regenerate files
+      Fix rest pattern with assignment expression (#197)
+      
+      * Fix rest pattern with assignment expression
+      
+      * Regenerate files
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/LICENSE
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 5f90415434414122111ea124d456ea1cc0770d16
+Latest commit in repo: 1b3ba31c7538825b05815f4f5bffcca6394edc63
 Last change in file:
   commit c17fe899610ec86ad3e60899ba76b281d9750155
   Author: João Paulo Silva de Souza <17429390+resolritter@users.noreply.github.com>
@@ -45,17 +53,23 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/common/define-grammar.js
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 5f90415434414122111ea124d456ea1cc0770d16
+Latest commit in repo: 1b3ba31c7538825b05815f4f5bffcca6394edc63
 Last change in file:
-  commit a4b1bb6d4502b6024c57d5f30fe437e645bfc87f
-  Author: IWANABETHATGUY <974153916@qq.com>
-  Date:   Sun Oct 10 02:39:12 2021 +0800
+  commit 1b3ba31c7538825b05815f4f5bffcca6394edc63
+  Author: resolritter <17429390+resolritter@users.noreply.github.com>
+  Date:   Thu Jun 2 13:10:56 2022 -0300
   
-      fix: 🐛 template-literal-type with infer type
+      Fix extends (#204)
+      
+      * support extends (abstract)
+      
+      * regenerate parser
+      
+      Co-authored-by: resolritter <resolritter@users.noreply.github.com>
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/typescript/grammar.js
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 5f90415434414122111ea124d456ea1cc0770d16
+Latest commit in repo: 1b3ba31c7538825b05815f4f5bffcca6394edc63
 Last change in file:
   commit c17fe899610ec86ad3e60899ba76b281d9750155
   Author: João Paulo Silva de Souza <17429390+resolritter@users.noreply.github.com>
@@ -80,7 +94,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/semgrep-typescript/typescript/grammar.js
 Git repo name: ocaml-tree-sitter-semgrep
-Latest commit in repo: 9377521ad8c264ae1555e40b8906345c04904267
+Latest commit in repo: 47ec27b0541e9eb35a192d9b0a7173c319216086
 Last change in file:
   commit 1cfa0a2c63a1218cf7752cb1504689eed2511548
   Merge: e5e0c02 dbc2761
@@ -95,7 +109,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/tsx/grammar.js
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 5f90415434414122111ea124d456ea1cc0770d16
+Latest commit in repo: 1b3ba31c7538825b05815f4f5bffcca6394edc63
 Last change in file:
   commit c17fe899610ec86ad3e60899ba76b281d9750155
   Author: João Paulo Silva de Souza <17429390+resolritter@users.noreply.github.com>

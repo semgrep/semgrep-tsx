@@ -54,6 +54,9 @@ module.exports = function defineGrammar(dialect) {
       [$._type_query_call_expression, $.primary_expression],
       [$.type_query, $.primary_expression],
       [$.override_modifier, $.primary_expression],
+      [$.decorator_call_expression, $.decorator],
+      [$.literal_type, $.pattern],
+      [$.predefined_type, $.pattern]
     ]),
 
     conflicts: ($, previous) => previous.concat([
@@ -61,6 +64,10 @@ module.exports = function defineGrammar(dialect) {
       [$.call_expression, $.binary_expression, $.unary_expression],
       [$.call_expression, $.binary_expression, $.update_expression],
       [$.call_expression, $.binary_expression, $.type_assertion],
+      [$.call_expression, $.binary_expression, $.await_expression],
+
+      // This appears to be necessary to parse a parenthesized class expression
+      [$.class],
 
       [$.nested_identifier, $.nested_type_identifier, $.primary_expression],
       [$.nested_identifier, $.nested_type_identifier],
@@ -83,6 +90,9 @@ module.exports = function defineGrammar(dialect) {
       [$.primary_expression, $._parameter_name, $._primary_type],
       [$.primary_expression, $._parameter_name, $.array_type, $.tuple_type],
       [$.primary_expression, $.literal_type],
+      [$.primary_expression, $.literal_type, $.pattern],
+      [$.primary_expression, $.literal_type, $.rest_pattern],
+      [$.primary_expression, $.predefined_type, $.rest_pattern],
       [$.primary_expression, $._primary_type],
       [$.primary_expression, $.generic_type],
       [$.primary_expression, $.predefined_type],
@@ -263,8 +273,14 @@ module.exports = function defineGrammar(dialect) {
 
       export_statement: ($, previous) => choice(
         previous,
-        seq('export', 'type', $.export_clause),
-        seq('export', '=', $.identifier, $._semicolon),
+        seq(
+          'export',
+          'type',
+          $.export_clause,
+          optional($._from_clause),
+          $._semicolon
+        ),
+        seq('export', '=', $.expression, $._semicolon),
         seq('export', 'as', 'namespace', $.identifier, $._semicolon),
       ),
 
@@ -469,6 +485,8 @@ module.exports = function defineGrammar(dialect) {
 
       _module: $ => prec.right(seq(
         field('name', choice($.string, $.identifier, $.nested_identifier)),
+        // On .d.ts files "declare module foo" desugars to "declare module foo {}",
+        // hence why it is optional here
         field('body', optional($.statement_block))
       )),
 
@@ -577,8 +595,6 @@ module.exports = function defineGrammar(dialect) {
 
       _type: $ => choice(
         $._primary_type,
-        $.union_type,
-        $.intersection_type,
         $.function_type,
         $.readonly_type,
         $.constructor_type,
@@ -608,6 +624,7 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       constructor_type: $ => prec.left(seq(
+        optional('abstract'),
         'new',
         field('type_parameters', optional($.type_parameters)),
         field('parameters', $.formal_parameters),
@@ -632,12 +649,14 @@ module.exports = function defineGrammar(dialect) {
         $.literal_type,
         $.lookup_type,
         $.conditional_type,
-        $.template_literal_type
+        $.template_literal_type,
+        $.intersection_type,
+        $.union_type
       ),
 
-      template_type: $ => seq('${',choice($._primary_type, $.infer_type),'}'),
+      template_type: $ => seq('${', choice($._primary_type, $.infer_type), '}'),
 
-      template_literal_type: $ =>     seq(
+      template_literal_type: $ => seq(
         '`',
         repeat(choice(
           $._template_chars,
@@ -839,6 +858,7 @@ module.exports = function defineGrammar(dialect) {
       ),
 
       construct_signature: $ => seq(
+        optional('abstract'),
         'new',
         field('type_parameters', optional($.type_parameters)),
         field('parameters', $.formal_parameters),
