@@ -28,7 +28,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/LICENSE
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 1b3ba31c7538825b05815f4f5bffcca6394edc63
+Latest commit in repo: 391803ed80081b483d7ef3a6a412b0fb4d335329
 Last change in file:
   commit c17fe899610ec86ad3e60899ba76b281d9750155
   Author: João Paulo Silva de Souza <17429390+resolritter@users.noreply.github.com>
@@ -53,23 +53,18 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/common/define-grammar.js
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 1b3ba31c7538825b05815f4f5bffcca6394edc63
+Latest commit in repo: 391803ed80081b483d7ef3a6a412b0fb4d335329
 Last change in file:
-  commit 1b3ba31c7538825b05815f4f5bffcca6394edc63
-  Author: resolritter <17429390+resolritter@users.noreply.github.com>
-  Date:   Thu Jun 2 13:10:56 2022 -0300
+  commit 46e9c43848d13e10c8b92bebdfa29fa46a6895b5
+  Merge: 3e83446 22167c2
+  Author: pad <pad@r2c.dev>
+  Date:   Fri Jun 24 13:13:28 2022 +0200
   
-      Fix extends (#204)
-      
-      * support extends (abstract)
-      
-      * regenerate parser
-      
-      Co-authored-by: resolritter <resolritter@users.noreply.github.com>
+      Merge branch 'master' into object_is
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/typescript/grammar.js
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 1b3ba31c7538825b05815f4f5bffcca6394edc63
+Latest commit in repo: 391803ed80081b483d7ef3a6a412b0fb4d335329
 Last change in file:
   commit c17fe899610ec86ad3e60899ba76b281d9750155
   Author: João Paulo Silva de Souza <17429390+resolritter@users.noreply.github.com>
@@ -94,7 +89,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/semgrep-typescript/typescript/grammar.js
 Git repo name: ocaml-tree-sitter-semgrep
-Latest commit in repo: 47ec27b0541e9eb35a192d9b0a7173c319216086
+Latest commit in repo: 4080350dbc9ffcb2a608da93196ce68822c4769e
 Last change in file:
   commit 1cfa0a2c63a1218cf7752cb1504689eed2511548
   Merge: e5e0c02 dbc2761
@@ -109,7 +104,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/tsx/grammar.js
 Git repo name: tree-sitter-typescript
-Latest commit in repo: 1b3ba31c7538825b05815f4f5bffcca6394edc63
+Latest commit in repo: 391803ed80081b483d7ef3a6a412b0fb4d335329
 Last change in file:
   commit c17fe899610ec86ad3e60899ba76b281d9750155
   Author: João Paulo Silva de Souza <17429390+resolritter@users.noreply.github.com>
