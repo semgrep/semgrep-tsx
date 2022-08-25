@@ -2,21 +2,20 @@ File: semgrep-grammars/src/tree-sitter-javascript/LICENSE
 Git repo name: tree-sitter-javascript
 Latest commit in repo: 785831303ce3d36f5dd8ada7c4c7d63518d4d2f5
 Last change in file:
-  commit 435db852fbeff8fe298e25ad967c634d9698eec0
-  Author: fn ⌃ ⌥ <70830482+FnControlOption@users.noreply.github.com>
-  Date:   Mon Sep 13 13:32:20 2021 -0700
+  commit 236a8dc0e5116ca1aca483b1a90df07f4bf3177e
+  Author: Max Brunsfeld <maxbrunsfeld@gmail.com>
+  Date:   Wed Jul 30 00:40:50 2014 -0700
   
-      Add namespace_export alias (#195)
-      
-      * Add namespace_export alias
-      
-      * Regenerate files
+      Initial commit
 ---
 File: semgrep-grammars/src/tree-sitter-javascript/grammar.js
 Git repo name: tree-sitter-javascript
 Latest commit in repo: 785831303ce3d36f5dd8ada7c4c7d63518d4d2f5
 Last change in file:
   commit 08f70a92f50a2373563d0e1f2a60089a02d19ca4
+  gpg: Signature made Mon 20 Sep 2021 12:40:57 PM PDT
+  gpg:                using RSA key 4AEE18F83AFDEB23
+  gpg: Good signature from "GitHub (web-flow commit signing) <noreply@github.com>" [full]
   Author: fn ⌃ ⌥ <70830482+FnControlOption@users.noreply.github.com>
   Date:   Mon Sep 20 12:40:57 2021 -0700
   
@@ -30,26 +29,11 @@ File: semgrep-grammars/src/tree-sitter-typescript/LICENSE
 Git repo name: tree-sitter-typescript
 Latest commit in repo: 391803ed80081b483d7ef3a6a412b0fb4d335329
 Last change in file:
-  commit c17fe899610ec86ad3e60899ba76b281d9750155
-  Author: João Paulo Silva de Souza <17429390+resolritter@users.noreply.github.com>
-  Date:   Thu Feb 4 21:54:42 2021 -0300
+  commit 4380c6679db3af5c2c641b83fa41329479b1d5dd
+  Author: Max Brunsfeld <maxbrunsfeld@gmail.com>
+  Date:   Thu Feb 9 23:06:14 2017 -0800
   
-      Fix ambiguity between function signature and function declaration (#126)
-      
-      * fix ambiguity between function signature and function declaration
-      
-      * tweak parse-examples script
-      
-      * add redux to the ignored repositories
-      
-      * regenerate parser for function_signature
-      
-      * Simplify function_signature rule
-      
-      * Move known failures from parse-examples script into known_failures.txt
-      
-      Co-authored-by: resolritter <resolritter@users.noreply.github.com>
-      Co-authored-by: Max Brunsfeld <maxbrunsfeld@gmail.com>
+      Fix license
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/common/define-grammar.js
 Git repo name: tree-sitter-typescript
@@ -66,64 +50,59 @@ File: semgrep-grammars/src/tree-sitter-typescript/typescript/grammar.js
 Git repo name: tree-sitter-typescript
 Latest commit in repo: 391803ed80081b483d7ef3a6a412b0fb4d335329
 Last change in file:
-  commit c17fe899610ec86ad3e60899ba76b281d9750155
-  Author: João Paulo Silva de Souza <17429390+resolritter@users.noreply.github.com>
-  Date:   Thu Feb 4 21:54:42 2021 -0300
+  commit 4312b355b21710839110f934e240c7761383c86b
+  Author: Nathan Sobo <nathan@github.com>
+  Date:   Thu May 23 13:20:08 2019 -0700
   
-      Fix ambiguity between function signature and function declaration (#126)
-      
-      * fix ambiguity between function signature and function declaration
-      
-      * tweak parse-examples script
-      
-      * add redux to the ignored repositories
-      
-      * regenerate parser for function_signature
-      
-      * Simplify function_signature rule
-      
-      * Move known failures from parse-examples script into known_failures.txt
-      
-      Co-authored-by: resolritter <resolritter@users.noreply.github.com>
-      Co-authored-by: Max Brunsfeld <maxbrunsfeld@gmail.com>
+      Include common scanner.h in both custom scanners to avoid extra symbols
 ---
 File: semgrep-grammars/src/semgrep-typescript/typescript/grammar.js
 Git repo name: ocaml-tree-sitter-semgrep
-Latest commit in repo: 4080350dbc9ffcb2a608da93196ce68822c4769e
+Latest commit in repo: 903791068e35ae2f31894ac6c9b155e620f7df84
 Last change in file:
-  commit 1cfa0a2c63a1218cf7752cb1504689eed2511548
-  Merge: e5e0c02 dbc2761
-  Author: Martin Jambon <martin@mjambon.com>
-  Date:   Fri Feb 5 17:06:26 2021 -0800
+  commit f5c74b25c04be3b4901fe961e5c7a0489415aaaa
+  gpg: Signature made Wed 24 Aug 2022 06:31:16 PM PDT
+  gpg:                using RSA key C1930C5F9C9E0472DCF9ECC97D71116F505E5145
+  gpg: Good signature from "Nathaniel Mote <nat@r2c.dev>" [ultimate]
+  gpg:                 aka "Nathaniel Mote <nat@natmote.net>" [ultimate]
+  Author: Nat Mote <nat@r2c.dev>
+  Date:   Tue Aug 23 17:57:41 2022 -0700
   
-      Add 'lang/semgrep-grammars/' from commit 'dbc2761d2c62e60d2181d777393f9eaea08673a1'
+      feat(ts): Add ellipsis and top level switch case parsing
       
-      git-subtree-dir: lang/semgrep-grammars
-      git-subtree-mainline: e5e0c029006cf2d087615cc1420db28550c9ad38
-      git-subtree-split: dbc2761d2c62e60d2181d777393f9eaea08673a1
+      We recently received a feature request for allowing standalone switch
+      cases as patterns, e.g. `case 5: ...`. This seems useful. There is
+      currently no precedent for it in Semgrep, but there are a variety of
+      other partial programs that are allowed as patterns, so the
+      infrastructure for this exists.
+      
+      However, we currently use the JS pfff parser to parse all patterns for
+      TS and JS, rather than this tree sitter parser which we use for parsing
+      targets (for JS, we still fall back on the pfff parser, but for TS we
+      use this exclusively).
+      
+      Because we generally seem to be moving away from pfff parsers, I was
+      reluctant to add new features to the pfff parser. Instead, I would like
+      to begin to fall back on the tree sitter parser when parsing patterns,
+      just like we do when parsing targets.
+      
+      This PR adds parsing support for the semgrep ellipsis (`...`) and top
+      level switch case parsing to the TypeScript and TSX parsers. The
+      ellipsis is a table stakes feature, so I didn't want to omit it even
+      initially. The switch case provides the motivation for adding the
+      fallback logic (in an upcoming PR to Semgrep).
+      
+      Test plan: Automated tests plus a manual test with my upcoming changes
+      to Semgrep, where it can successfully match using a standalone switch
+      case pattern.
 ---
 File: semgrep-grammars/src/tree-sitter-typescript/tsx/grammar.js
 Git repo name: tree-sitter-typescript
 Latest commit in repo: 391803ed80081b483d7ef3a6a412b0fb4d335329
 Last change in file:
-  commit c17fe899610ec86ad3e60899ba76b281d9750155
-  Author: João Paulo Silva de Souza <17429390+resolritter@users.noreply.github.com>
-  Date:   Thu Feb 4 21:54:42 2021 -0300
+  commit 4312b355b21710839110f934e240c7761383c86b
+  Author: Nathan Sobo <nathan@github.com>
+  Date:   Thu May 23 13:20:08 2019 -0700
   
-      Fix ambiguity between function signature and function declaration (#126)
-      
-      * fix ambiguity between function signature and function declaration
-      
-      * tweak parse-examples script
-      
-      * add redux to the ignored repositories
-      
-      * regenerate parser for function_signature
-      
-      * Simplify function_signature rule
-      
-      * Move known failures from parse-examples script into known_failures.txt
-      
-      Co-authored-by: resolritter <resolritter@users.noreply.github.com>
-      Co-authored-by: Max Brunsfeld <maxbrunsfeld@gmail.com>
+      Include common scanner.h in both custom scanners to avoid extra symbols
 ---
