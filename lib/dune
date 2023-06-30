@@ -38,6 +38,7 @@
     (language cxx)
     (names )
     (flags -fPIC
+           -I %{env:TREESITTER_INCDIR=/usr/local/include}
            -I .)
   )
 )
