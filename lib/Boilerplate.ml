@@ -2058,6 +2058,9 @@ and map_for_header (env : env) ((v1, v2, v3, v4, v5) : CST.for_header) =
 
 and map_formal_parameter (env : env) (x : CST.formal_parameter) =
   (match x with
+  | `Semg_ellips tok -> R.Case ("Semg_ellips",
+      (* "..." *) token env tok
+    )
   | `Requ_param (v1, v2, v3) -> R.Case ("Requ_param",
       let v1 = map_parameter_name env v1 in
       let v2 =
