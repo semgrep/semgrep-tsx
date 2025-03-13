@@ -958,6 +958,7 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Literal "{");
       Repeat (
         Alt [|
+          Token (Name "semgrep_ellipsis");
           Token (Name "decorator");
           Seq [
             Token (Name "method_definition");
@@ -5873,10 +5874,14 @@ and trans_class_body ((kind, body) : mt) : CST.class_body =
               (fun v ->
                 (match v with
                 | Alt (0, v) ->
+                    `Semg_ellips (
+                      trans_semgrep_ellipsis (Run.matcher_token v)
+                    )
+                | Alt (1, v) ->
                     `Deco (
                       trans_decorator (Run.matcher_token v)
                     )
-                | Alt (1, v) ->
+                | Alt (2, v) ->
                     `Meth_defi_opt_choice_auto_semi (
                       (match v with
                       | Seq [v0; v1] ->
@@ -5901,7 +5906,7 @@ and trans_class_body ((kind, body) : mt) : CST.class_body =
                       | _ -> assert false
                       )
                     )
-                | Alt (2, v) ->
+                | Alt (3, v) ->
                     `Meth_sign_choice_func_sign_auto_semi (
                       (match v with
                       | Seq [v0; v1] ->
@@ -5922,7 +5927,7 @@ and trans_class_body ((kind, body) : mt) : CST.class_body =
                       | _ -> assert false
                       )
                     )
-                | Alt (3, v) ->
+                | Alt (4, v) ->
                     `Choice_abst_meth_sign_choice_choice_auto_semi (
                       (match v with
                       | Seq [v0; v1] ->

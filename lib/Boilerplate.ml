@@ -1261,6 +1261,9 @@ and map_class_body (env : env) ((v1, v2, v3) : CST.class_body) =
   let v2 =
     R.List (List.map (fun x ->
       (match x with
+      | `Semg_ellips tok -> R.Case ("Semg_ellips",
+          (* "..." *) token env tok
+        )
       | `Deco x -> R.Case ("Deco",
           map_decorator env x
         )
