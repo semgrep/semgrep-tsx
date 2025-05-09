@@ -912,11 +912,8 @@ and map_anon_choice_pair_20c9acd (env : env) (x : CST.anon_choice_pair_20c9acd) 
 
 and map_anon_choice_pair_pat_3ff9cbe (env : env) (x : CST.anon_choice_pair_pat_3ff9cbe) =
   (match x with
-  | `Pair_pat (v1, v2, v3) -> R.Case ("Pair_pat",
-      let v1 = map_property_name env v1 in
-      let v2 = (* ":" *) token env v2 in
-      let v3 = map_anon_choice_pat_3297d92 env v3 in
-      R.Tuple [v1; v2; v3]
+  | `Pair_pat x -> R.Case ("Pair_pat",
+      map_pair_pattern env x
     )
   | `Rest_pat x -> R.Case ("Rest_pat",
       map_rest_pattern env x
@@ -2969,6 +2966,19 @@ and map_pair (env : env) (x : CST.pair) =
       let v1 = map_property_name env v1 in
       let v2 = (* ":" *) token env v2 in
       let v3 = map_expression env v3 in
+      R.Tuple [v1; v2; v3]
+    )
+  | `Semg_ellips tok -> R.Case ("Semg_ellips",
+      (* "..." *) token env tok
+    )
+  )
+
+and map_pair_pattern (env : env) (x : CST.pair_pattern) =
+  (match x with
+  | `Prop_name_COLON_choice_pat (v1, v2, v3) -> R.Case ("Prop_name_COLON_choice_pat",
+      let v1 = map_property_name env v1 in
+      let v2 = (* ":" *) token env v2 in
+      let v3 = map_anon_choice_pat_3297d92 env v3 in
       R.Tuple [v1; v2; v3]
     )
   | `Semg_ellips tok -> R.Case ("Semg_ellips",

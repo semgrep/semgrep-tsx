@@ -2610,14 +2610,17 @@ let children_regexps : (string * Run.exp option) list = [
   );
   "pair_pattern",
   Some (
-    Seq [
-      Token (Name "property_name");
-      Token (Literal ":");
-      Alt [|
-        Token (Name "pattern");
-        Token (Name "assignment_pattern");
-      |];
-    ];
+    Alt [|
+      Seq [
+        Token (Name "property_name");
+        Token (Literal ":");
+        Alt [|
+          Token (Name "pattern");
+          Token (Name "assignment_pattern");
+        |];
+      ];
+      Token (Name "semgrep_ellipsis");
+    |];
   );
   "parameter_name",
   Some (
@@ -10086,21 +10089,31 @@ and trans_pair_pattern ((kind, body) : mt) : CST.pair_pattern =
   match body with
   | Children v ->
       (match v with
-      | Seq [v0; v1; v2] ->
-          (
-            trans_property_name (Run.matcher_token v0),
-            Run.trans_token (Run.matcher_token v1),
-            (match v2 with
-            | Alt (0, v) ->
-                `Pat (
-                  trans_pattern (Run.matcher_token v)
-                )
-            | Alt (1, v) ->
-                `Assign_pat (
-                  trans_assignment_pattern (Run.matcher_token v)
+      | Alt (0, v) ->
+          `Prop_name_COLON_choice_pat (
+            (match v with
+            | Seq [v0; v1; v2] ->
+                (
+                  trans_property_name (Run.matcher_token v0),
+                  Run.trans_token (Run.matcher_token v1),
+                  (match v2 with
+                  | Alt (0, v) ->
+                      `Pat (
+                        trans_pattern (Run.matcher_token v)
+                      )
+                  | Alt (1, v) ->
+                      `Assign_pat (
+                        trans_assignment_pattern (Run.matcher_token v)
+                      )
+                  | _ -> assert false
+                  )
                 )
             | _ -> assert false
             )
+          )
+      | Alt (1, v) ->
+          `Semg_ellips (
+            trans_semgrep_ellipsis (Run.matcher_token v)
           )
       | _ -> assert false
       )

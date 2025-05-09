@@ -419,9 +419,7 @@ and anon_choice_pair_20c9acd = [
 ]
 
 and anon_choice_pair_pat_3ff9cbe = [
-    `Pair_pat of (
-        property_name * Token.t (* ":" *) * anon_choice_pat_3297d92
-    )
+    `Pair_pat of pair_pattern
   | `Rest_pat of rest_pattern
   | `Obj_assign_pat of (
         [
@@ -1217,6 +1215,13 @@ and pair = [
   | `Semg_ellips of Token.t (* "..." *)
 ]
 
+and pair_pattern = [
+    `Prop_name_COLON_choice_pat of (
+        property_name * Token.t (* ":" *) * anon_choice_pat_3297d92
+    )
+  | `Semg_ellips of Token.t (* "..." *)
+]
+
 and parameter_name = (
     decorator list (* zero or more *)
   * accessibility_modifier option
@@ -2000,10 +2005,6 @@ type optional_tuple_parameter (* inlined *) = (
 )
 
 type optional_type (* inlined *) = (type_ * Token.t (* "?" *))
-
-type pair_pattern (* inlined *) = (
-    property_name * Token.t (* ":" *) * anon_choice_pat_3297d92
-)
 
 type parenthesized_type (* inlined *) = (
     Token.t (* "(" *) * type_ * Token.t (* ")" *)

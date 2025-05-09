@@ -53,7 +53,7 @@ Last change in file:
 ---
 File: semgrep-grammars/src/semgrep-typescript/typescript/grammar.js
 Git repo name: ocaml-tree-sitter-semgrep
-Latest commit in repo: 970ad574ff901333e374a46d672b087a04cd1f78
+Latest commit in repo: 7c219fc2d7445309755fc2ada49e7b601d9b60ba
 Last change in file:
   commit f5c74b25c04be3b4901fe961e5c7a0489415aaaa
   Author: Nat Mote <nat@r2c.dev>
