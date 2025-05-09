@@ -896,11 +896,8 @@ and map_anon_choice_jsx_attr_name_b052322 (env : env) (x : CST.anon_choice_jsx_a
 
 and map_anon_choice_pair_20c9acd (env : env) (x : CST.anon_choice_pair_20c9acd) =
   (match x with
-  | `Pair (v1, v2, v3) -> R.Case ("Pair",
-      let v1 = map_property_name env v1 in
-      let v2 = (* ":" *) token env v2 in
-      let v3 = map_expression env v3 in
-      R.Tuple [v1; v2; v3]
+  | `Pair x -> R.Case ("Pair",
+      map_pair env x
     )
   | `Spread_elem x -> R.Case ("Spread_elem",
       map_spread_element env x
@@ -2965,6 +2962,19 @@ and map_opting_type_annotation (env : env) ((v1, v2) : CST.opting_type_annotatio
   let v1 = (* "?:" *) token env v1 in
   let v2 = map_type_ env v2 in
   R.Tuple [v1; v2]
+
+and map_pair (env : env) (x : CST.pair) =
+  (match x with
+  | `Prop_name_COLON_exp (v1, v2, v3) -> R.Case ("Prop_name_COLON_exp",
+      let v1 = map_property_name env v1 in
+      let v2 = (* ":" *) token env v2 in
+      let v3 = map_expression env v3 in
+      R.Tuple [v1; v2; v3]
+    )
+  | `Semg_ellips tok -> R.Case ("Semg_ellips",
+      (* "..." *) token env tok
+    )
+  )
 
 and map_parameter_name (env : env) ((v1, v2, v3, v4, v5) : CST.parameter_name) =
   let v1 = R.List (List.map (map_decorator env) v1) in

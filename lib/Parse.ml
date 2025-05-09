@@ -2599,11 +2599,14 @@ let children_regexps : (string * Run.exp option) list = [
   );
   "pair",
   Some (
-    Seq [
-      Token (Name "property_name");
-      Token (Literal ":");
-      Token (Name "expression");
-    ];
+    Alt [|
+      Seq [
+        Token (Name "property_name");
+        Token (Literal ":");
+        Token (Name "expression");
+      ];
+      Token (Name "semgrep_ellipsis");
+    |];
   );
   "pair_pattern",
   Some (
@@ -10059,11 +10062,21 @@ and trans_pair ((kind, body) : mt) : CST.pair =
   match body with
   | Children v ->
       (match v with
-      | Seq [v0; v1; v2] ->
-          (
-            trans_property_name (Run.matcher_token v0),
-            Run.trans_token (Run.matcher_token v1),
-            trans_expression (Run.matcher_token v2)
+      | Alt (0, v) ->
+          `Prop_name_COLON_exp (
+            (match v with
+            | Seq [v0; v1; v2] ->
+                (
+                  trans_property_name (Run.matcher_token v0),
+                  Run.trans_token (Run.matcher_token v1),
+                  trans_expression (Run.matcher_token v2)
+                )
+            | _ -> assert false
+            )
+          )
+      | Alt (1, v) ->
+          `Semg_ellips (
+            trans_semgrep_ellipsis (Run.matcher_token v)
           )
       | _ -> assert false
       )
