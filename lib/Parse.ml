@@ -32,13 +32,12 @@ let extras = [
 ]
 
 let children_regexps : (string * Run.exp option) list = [
-  "unescaped_double_string_fragment", None;
-  "imm_tok_prec_p1_slash", None;
-  "unescaped_single_string_fragment", None;
-  "unescaped_double_jsx_string_fragment", None;
-  "existential_type", None;
-  "null", None;
   "undefined", None;
+  "imm_tok_prec_p1_slash", None;
+  "unescaped_double_string_fragment", None;
+  "existential_type", None;
+  "semgrep_metavariable", None;
+  "null", None;
   "accessibility_modifier",
   Some (
     Alt [|
@@ -47,10 +46,12 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Literal "protected");
     |];
   );
-  "unescaped_single_jsx_string_fragment", None;
+  "unescaped_double_jsx_string_fragment", None;
   "identifier", None;
+  "true", None;
   "false", None;
   "html_character_reference", None;
+  "this", None;
   "optional_chain", None;
   "semgrep_expression_ellipsis", None;
   "import", None;
@@ -79,9 +80,9 @@ let children_regexps : (string * Run.exp option) list = [
     |];
   );
   "override_modifier", None;
-  "this", None;
-  "true", None;
-  "super", None;
+  "unescaped_single_string_fragment", None;
+  "template_chars", None;
+  "ternary_qmark", None;
   "html_comment", None;
   "meta_property",
   Some (
@@ -98,13 +99,13 @@ let children_regexps : (string * Run.exp option) list = [
       ];
     |];
   );
-  "ternary_qmark", None;
+  "super", None;
   "jsx_text", None;
   "comment", None;
-  "template_chars", None;
   "regex_pattern", None;
   "jsx_identifier", None;
   "semgrep_ellipsis", None;
+  "unescaped_single_jsx_string_fragment", None;
   "automatic_semicolon", None;
   "hash_bang_line", None;
   "nested_identifier",
@@ -144,30 +145,15 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Literal "type");
     |];
   );
-  "jsx_string",
+  "number_",
   Some (
-    Alt [|
-      Seq [
-        Token (Literal "\"");
-        Repeat (
-          Alt [|
-            Token (Name "unescaped_double_jsx_string_fragment");
-            Token (Name "html_character_reference");
-          |];
-        );
-        Token (Literal "\"");
-      ];
-      Seq [
-        Token (Literal "'");
-        Repeat (
-          Alt [|
-            Token (Name "unescaped_single_jsx_string_fragment");
-            Token (Name "html_character_reference");
-          |];
-        );
-        Token (Literal "'");
-      ];
-    |];
+    Seq [
+      Alt [|
+        Token (Literal "-");
+        Token (Literal "+");
+      |];
+      Token (Name "number");
+    ];
   );
   "string",
   Some (
@@ -194,16 +180,6 @@ let children_regexps : (string * Run.exp option) list = [
       ];
     |];
   );
-  "number_",
-  Some (
-    Seq [
-      Alt [|
-        Token (Literal "-");
-        Token (Literal "+");
-      |];
-      Token (Name "number");
-    ];
-  );
   "regex",
   Some (
     Seq [
@@ -228,6 +204,31 @@ let children_regexps : (string * Run.exp option) list = [
         Token (Name "identifier");
       |];
     ];
+  );
+  "jsx_string",
+  Some (
+    Alt [|
+      Seq [
+        Token (Literal "\"");
+        Repeat (
+          Alt [|
+            Token (Name "unescaped_double_jsx_string_fragment");
+            Token (Name "html_character_reference");
+          |];
+        );
+        Token (Literal "\"");
+      ];
+      Seq [
+        Token (Literal "'");
+        Repeat (
+          Alt [|
+            Token (Name "unescaped_single_jsx_string_fragment");
+            Token (Name "html_character_reference");
+          |];
+        );
+        Token (Literal "'");
+      ];
+    |];
   );
   "break_statement",
   Some (
@@ -1977,13 +1978,17 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Name "jsx_opening_element");
       Repeat (
         Alt [|
-          Token (Name "jsx_text");
-          Token (Name "html_character_reference");
           Alt [|
-            Token (Name "jsx_element");
-            Token (Name "jsx_self_closing_element");
+            Token (Name "jsx_text");
+            Token (Name "html_character_reference");
+            Alt [|
+              Token (Name "jsx_element");
+              Token (Name "jsx_self_closing_element");
+            |];
+            Token (Name "jsx_expression");
           |];
-          Token (Name "jsx_expression");
+          Token (Name "semgrep_ellipsis");
+          Token (Name "semgrep_metavariable");
         |];
       );
       Token (Name "jsx_closing_element");
@@ -3595,11 +3600,18 @@ let children_regexps : (string * Run.exp option) list = [
       |];
     ];
   );
+  "semgrep_pattern",
+  Some (
+    Alt [|
+      Token (Name "expression");
+      Token (Name "pair");
+    |];
+  );
   "semgrep_expression",
   Some (
     Seq [
       Token (Literal "__SEMGREP_EXPRESSION");
-      Token (Name "expression");
+      Token (Name "semgrep_pattern");
     ];
   );
   "program",
@@ -3619,7 +3631,7 @@ let children_regexps : (string * Run.exp option) list = [
   );
 ]
 
-let trans_unescaped_double_string_fragment ((kind, body) : mt) : CST.unescaped_double_string_fragment =
+let trans_undefined ((kind, body) : mt) : CST.undefined =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3629,12 +3641,7 @@ let trans_imm_tok_prec_p1_slash ((kind, body) : mt) : CST.imm_tok_prec_p1_slash 
   | Leaf v -> v
   | Children _ -> assert false
 
-let trans_unescaped_single_string_fragment ((kind, body) : mt) : CST.unescaped_single_string_fragment =
-  match body with
-  | Leaf v -> v
-  | Children _ -> assert false
-
-let trans_unescaped_double_jsx_string_fragment ((kind, body) : mt) : CST.unescaped_double_jsx_string_fragment =
+let trans_unescaped_double_string_fragment ((kind, body) : mt) : CST.unescaped_double_string_fragment =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3644,12 +3651,12 @@ let trans_existential_type ((kind, body) : mt) : CST.existential_type =
   | Leaf v -> v
   | Children _ -> assert false
 
-let trans_null ((kind, body) : mt) : CST.null =
+let trans_semgrep_metavariable ((kind, body) : mt) : CST.semgrep_metavariable =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
 
-let trans_undefined ((kind, body) : mt) : CST.undefined =
+let trans_null ((kind, body) : mt) : CST.null =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3674,12 +3681,17 @@ let trans_accessibility_modifier ((kind, body) : mt) : CST.accessibility_modifie
       )
   | Leaf _ -> assert false
 
-let trans_unescaped_single_jsx_string_fragment ((kind, body) : mt) : CST.unescaped_single_jsx_string_fragment =
+let trans_unescaped_double_jsx_string_fragment ((kind, body) : mt) : CST.unescaped_double_jsx_string_fragment =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
 
 let trans_identifier ((kind, body) : mt) : CST.identifier =
+  match body with
+  | Leaf v -> v
+  | Children _ -> assert false
+
+let trans_true_ ((kind, body) : mt) : CST.true_ =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3690,6 +3702,11 @@ let trans_false_ ((kind, body) : mt) : CST.false_ =
   | Children _ -> assert false
 
 let trans_html_character_reference ((kind, body) : mt) : CST.html_character_reference =
+  match body with
+  | Leaf v -> v
+  | Children _ -> assert false
+
+let trans_this ((kind, body) : mt) : CST.this =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3799,17 +3816,17 @@ let trans_override_modifier ((kind, body) : mt) : CST.override_modifier =
   | Leaf v -> v
   | Children _ -> assert false
 
-let trans_this ((kind, body) : mt) : CST.this =
+let trans_unescaped_single_string_fragment ((kind, body) : mt) : CST.unescaped_single_string_fragment =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
 
-let trans_true_ ((kind, body) : mt) : CST.true_ =
+let trans_template_chars ((kind, body) : mt) : CST.template_chars =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
 
-let trans_super ((kind, body) : mt) : CST.super =
+let trans_ternary_qmark ((kind, body) : mt) : CST.ternary_qmark =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3852,7 +3869,7 @@ let trans_meta_property ((kind, body) : mt) : CST.meta_property =
       )
   | Leaf _ -> assert false
 
-let trans_ternary_qmark ((kind, body) : mt) : CST.ternary_qmark =
+let trans_super ((kind, body) : mt) : CST.super =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3863,11 +3880,6 @@ let trans_jsx_text ((kind, body) : mt) : CST.jsx_text =
   | Children _ -> assert false
 
 let trans_comment ((kind, body) : mt) : CST.comment =
-  match body with
-  | Leaf v -> v
-  | Children _ -> assert false
-
-let trans_template_chars ((kind, body) : mt) : CST.template_chars =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3884,6 +3896,11 @@ let trans_jsx_identifier ((kind, body) : mt) : CST.jsx_identifier =
   | Children _ -> assert false
 
 let trans_semgrep_ellipsis ((kind, body) : mt) : CST.semgrep_ellipsis =
+  match body with
+  | Leaf v -> v
+  | Children _ -> assert false
+
+let trans_unescaped_single_jsx_string_fragment ((kind, body) : mt) : CST.unescaped_single_jsx_string_fragment =
   match body with
   | Leaf v -> v
   | Children _ -> assert false
@@ -3923,6 +3940,7 @@ let rec trans_nested_identifier ((kind, body) : mt) : CST.nested_identifier =
       )
   | Leaf _ -> assert false
 
+
 let rec trans_decorator_member_expression ((kind, body) : mt) : CST.decorator_member_expression =
   match body with
   | Children v ->
@@ -3947,7 +3965,6 @@ let rec trans_decorator_member_expression ((kind, body) : mt) : CST.decorator_me
       | _ -> assert false
       )
   | Leaf _ -> assert false
-
 
 
 let trans_namespace_import ((kind, body) : mt) : CST.namespace_import =
@@ -3980,63 +3997,25 @@ let trans_import_identifier ((kind, body) : mt) : CST.import_identifier =
       )
   | Leaf _ -> assert false
 
-let trans_jsx_string ((kind, body) : mt) : CST.jsx_string =
+let trans_number_ ((kind, body) : mt) : CST.number_ =
   match body with
   | Children v ->
       (match v with
-      | Alt (0, v) ->
-          `DQUOT_rep_choice_unes_double_jsx_str_frag_DQUOT (
-            (match v with
-            | Seq [v0; v1; v2] ->
-                (
-                  Run.trans_token (Run.matcher_token v0),
-                  Run.repeat
-                    (fun v ->
-                      (match v with
-                      | Alt (0, v) ->
-                          `Unes_double_jsx_str_frag (
-                            trans_unescaped_double_jsx_string_fragment (Run.matcher_token v)
-                          )
-                      | Alt (1, v) ->
-                          `Html_char_ref (
-                            trans_html_character_reference (Run.matcher_token v)
-                          )
-                      | _ -> assert false
-                      )
-                    )
-                    v1
-                  ,
-                  Run.trans_token (Run.matcher_token v2)
+      | Seq [v0; v1] ->
+          (
+            (match v0 with
+            | Alt (0, v) ->
+                `DASH (
+                  Run.trans_token (Run.matcher_token v)
+                )
+            | Alt (1, v) ->
+                `PLUS (
+                  Run.trans_token (Run.matcher_token v)
                 )
             | _ -> assert false
             )
-          )
-      | Alt (1, v) ->
-          `SQUOT_rep_choice_unes_single_jsx_str_frag_SQUOT (
-            (match v with
-            | Seq [v0; v1; v2] ->
-                (
-                  Run.trans_token (Run.matcher_token v0),
-                  Run.repeat
-                    (fun v ->
-                      (match v with
-                      | Alt (0, v) ->
-                          `Unes_single_jsx_str_frag (
-                            trans_unescaped_single_jsx_string_fragment (Run.matcher_token v)
-                          )
-                      | Alt (1, v) ->
-                          `Html_char_ref (
-                            trans_html_character_reference (Run.matcher_token v)
-                          )
-                      | _ -> assert false
-                      )
-                    )
-                    v1
-                  ,
-                  Run.trans_token (Run.matcher_token v2)
-                )
-            | _ -> assert false
-            )
+            ,
+            trans_number (Run.matcher_token v1)
           )
       | _ -> assert false
       )
@@ -4104,30 +4083,6 @@ let trans_string_ ((kind, body) : mt) : CST.string_ =
       )
   | Leaf _ -> assert false
 
-let trans_number_ ((kind, body) : mt) : CST.number_ =
-  match body with
-  | Children v ->
-      (match v with
-      | Seq [v0; v1] ->
-          (
-            (match v0 with
-            | Alt (0, v) ->
-                `DASH (
-                  Run.trans_token (Run.matcher_token v)
-                )
-            | Alt (1, v) ->
-                `PLUS (
-                  Run.trans_token (Run.matcher_token v)
-                )
-            | _ -> assert false
-            )
-            ,
-            trans_number (Run.matcher_token v1)
-          )
-      | _ -> assert false
-      )
-  | Leaf _ -> assert false
-
 let trans_regex ((kind, body) : mt) : CST.regex =
   match body with
   | Children v ->
@@ -4181,6 +4136,67 @@ let trans_jsx_namespace_name ((kind, body) : mt) : CST.jsx_namespace_name =
       )
   | Leaf _ -> assert false
 
+let trans_jsx_string ((kind, body) : mt) : CST.jsx_string =
+  match body with
+  | Children v ->
+      (match v with
+      | Alt (0, v) ->
+          `DQUOT_rep_choice_unes_double_jsx_str_frag_DQUOT (
+            (match v with
+            | Seq [v0; v1; v2] ->
+                (
+                  Run.trans_token (Run.matcher_token v0),
+                  Run.repeat
+                    (fun v ->
+                      (match v with
+                      | Alt (0, v) ->
+                          `Unes_double_jsx_str_frag (
+                            trans_unescaped_double_jsx_string_fragment (Run.matcher_token v)
+                          )
+                      | Alt (1, v) ->
+                          `Html_char_ref (
+                            trans_html_character_reference (Run.matcher_token v)
+                          )
+                      | _ -> assert false
+                      )
+                    )
+                    v1
+                  ,
+                  Run.trans_token (Run.matcher_token v2)
+                )
+            | _ -> assert false
+            )
+          )
+      | Alt (1, v) ->
+          `SQUOT_rep_choice_unes_single_jsx_str_frag_SQUOT (
+            (match v with
+            | Seq [v0; v1; v2] ->
+                (
+                  Run.trans_token (Run.matcher_token v0),
+                  Run.repeat
+                    (fun v ->
+                      (match v with
+                      | Alt (0, v) ->
+                          `Unes_single_jsx_str_frag (
+                            trans_unescaped_single_jsx_string_fragment (Run.matcher_token v)
+                          )
+                      | Alt (1, v) ->
+                          `Html_char_ref (
+                            trans_html_character_reference (Run.matcher_token v)
+                          )
+                      | _ -> assert false
+                      )
+                    )
+                    v1
+                  ,
+                  Run.trans_token (Run.matcher_token v2)
+                )
+            | _ -> assert false
+            )
+          )
+      | _ -> assert false
+      )
+  | Leaf _ -> assert false
 
 let trans_break_statement ((kind, body) : mt) : CST.break_statement =
   match body with
@@ -4235,6 +4251,7 @@ let trans_continue_statement ((kind, body) : mt) : CST.continue_statement =
       | _ -> assert false
       )
   | Leaf _ -> assert false
+
 
 let trans_debugger_statement ((kind, body) : mt) : CST.debugger_statement =
   match body with
@@ -8365,30 +8382,44 @@ and trans_jsx_element ((kind, body) : mt) : CST.jsx_element =
               (fun v ->
                 (match v with
                 | Alt (0, v) ->
-                    `Jsx_text (
-                      trans_jsx_text (Run.matcher_token v)
-                    )
-                | Alt (1, v) ->
-                    `Html_char_ref (
-                      trans_html_character_reference (Run.matcher_token v)
-                    )
-                | Alt (2, v) ->
-                    `Choice_jsx_elem (
+                    `Choice_jsx_text (
                       (match v with
                       | Alt (0, v) ->
-                          `Jsx_elem (
-                            trans_jsx_element (Run.matcher_token v)
+                          `Jsx_text (
+                            trans_jsx_text (Run.matcher_token v)
                           )
                       | Alt (1, v) ->
-                          `Jsx_self_clos_elem (
-                            trans_jsx_self_closing_element (Run.matcher_token v)
+                          `Html_char_ref (
+                            trans_html_character_reference (Run.matcher_token v)
+                          )
+                      | Alt (2, v) ->
+                          `Choice_jsx_elem (
+                            (match v with
+                            | Alt (0, v) ->
+                                `Jsx_elem (
+                                  trans_jsx_element (Run.matcher_token v)
+                                )
+                            | Alt (1, v) ->
+                                `Jsx_self_clos_elem (
+                                  trans_jsx_self_closing_element (Run.matcher_token v)
+                                )
+                            | _ -> assert false
+                            )
+                          )
+                      | Alt (3, v) ->
+                          `Jsx_exp (
+                            trans_jsx_expression (Run.matcher_token v)
                           )
                       | _ -> assert false
                       )
                     )
-                | Alt (3, v) ->
-                    `Jsx_exp (
-                      trans_jsx_expression (Run.matcher_token v)
+                | Alt (1, v) ->
+                    `Semg_ellips (
+                      trans_semgrep_ellipsis (Run.matcher_token v)
+                    )
+                | Alt (2, v) ->
+                    `Semg_meta (
+                      trans_semgrep_metavariable (Run.matcher_token v)
                     )
                 | _ -> assert false
                 )
@@ -12541,6 +12572,26 @@ and trans_yield_expression ((kind, body) : mt) : CST.yield_expression =
 
 
 
+let trans_semgrep_pattern ((kind, body) : mt) : CST.semgrep_pattern =
+  match body with
+  | Children v ->
+      (match v with
+      | Alt (0, v) ->
+          `Exp (
+            trans_expression (Run.matcher_token v)
+          )
+      | Alt (1, v) ->
+          `Pair (
+            trans_pair (Run.matcher_token v)
+          )
+      | _ -> assert false
+      )
+  | Leaf _ -> assert false
+
+
+
+
+
 
 
 let trans_semgrep_expression ((kind, body) : mt) : CST.semgrep_expression =
@@ -12550,15 +12601,11 @@ let trans_semgrep_expression ((kind, body) : mt) : CST.semgrep_expression =
       | Seq [v0; v1] ->
           (
             Run.trans_token (Run.matcher_token v0),
-            trans_expression (Run.matcher_token v1)
+            trans_semgrep_pattern (Run.matcher_token v1)
           )
       | _ -> assert false
       )
   | Leaf _ -> assert false
-
-
-
-
 
 let trans_program ((kind, body) : mt) : CST.program =
   match body with

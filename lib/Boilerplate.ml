@@ -71,8 +71,8 @@ let map_predefined_type (env : env) (x : CST.predefined_type) =
     )
   )
 
-let map_unescaped_double_jsx_string_fragment (env : env) (tok : CST.unescaped_double_jsx_string_fragment) =
-  (* pattern "([^\"&]|&[^#A-Za-z])+" *) token env tok
+let map_ternary_qmark (env : env) (tok : CST.ternary_qmark) =
+  (* ternary_qmark *) token env tok
 
 let map_accessibility_modifier (env : env) (x : CST.accessibility_modifier) =
   (match x with
@@ -87,6 +87,9 @@ let map_accessibility_modifier (env : env) (x : CST.accessibility_modifier) =
     )
   )
 
+let map_template_chars (env : env) (tok : CST.template_chars) =
+  (* template_chars *) token env tok
+
 let map_anon_choice_DASH_81d4819 (env : env) (x : CST.anon_choice_DASH_81d4819) =
   (match x with
   | `DASH tok -> R.Case ("DASH",
@@ -99,9 +102,6 @@ let map_anon_choice_DASH_81d4819 (env : env) (x : CST.anon_choice_DASH_81d4819) 
 
 let map_escape_sequence (env : env) (tok : CST.escape_sequence) =
   (* escape_sequence *) token env tok
-
-let map_ternary_qmark (env : env) (tok : CST.ternary_qmark) =
-  (* ternary_qmark *) token env tok
 
 let map_reserved_identifier (env : env) (x : CST.reserved_identifier) =
   (match x with
@@ -180,8 +180,8 @@ let map_reserved_identifier (env : env) (x : CST.reserved_identifier) =
     )
   )
 
-let map_unescaped_single_string_fragment (env : env) (tok : CST.unescaped_single_string_fragment) =
-  (* pattern "[^'\\\\\\r\\n]+" *) token env tok
+let map_unescaped_double_string_fragment (env : env) (tok : CST.unescaped_double_string_fragment) =
+  (* pattern "[^\"\\\\\\r\\n]+" *) token env tok
 
 let map_anon_choice_type_2b11f6b (env : env) (x : CST.anon_choice_type_2b11f6b) =
   (match x with
@@ -231,17 +231,17 @@ let map_anon_choice_let_ca16eb3 (env : env) (x : CST.anon_choice_let_ca16eb3) =
     )
   )
 
+let map_unescaped_single_string_fragment (env : env) (tok : CST.unescaped_single_string_fragment) =
+  (* pattern "[^'\\\\\\r\\n]+" *) token env tok
+
 let map_number (env : env) (tok : CST.number) =
   (* number *) token env tok
 
-let map_unescaped_single_jsx_string_fragment (env : env) (tok : CST.unescaped_single_jsx_string_fragment) =
-  (* pattern "([^'&]|&[^#A-Za-z])+" *) token env tok
+let map_unescaped_double_jsx_string_fragment (env : env) (tok : CST.unescaped_double_jsx_string_fragment) =
+  (* pattern "([^\"&]|&[^#A-Za-z])+" *) token env tok
 
 let map_imm_tok_prec_p1_slash (env : env) (tok : CST.imm_tok_prec_p1_slash) =
   (* "/" *) token env tok
-
-let map_template_chars (env : env) (tok : CST.template_chars) =
-  (* template_chars *) token env tok
 
 let map_function_signature_automatic_semicolon (env : env) (tok : CST.function_signature_automatic_semicolon) =
   (* function_signature_automatic_semicolon *) token env tok
@@ -262,17 +262,20 @@ let map_anon_choice_get_8fb02de (env : env) (x : CST.anon_choice_get_8fb02de) =
     )
   )
 
+let map_semgrep_metavariable (env : env) (tok : CST.semgrep_metavariable) =
+  (* pattern \$[A-Z_][A-Z_0-9]* *) token env tok
+
 let map_regex_flags (env : env) (tok : CST.regex_flags) =
   (* pattern [a-z]+ *) token env tok
-
-let map_unescaped_double_string_fragment (env : env) (tok : CST.unescaped_double_string_fragment) =
-  (* pattern "[^\"\\\\\\r\\n]+" *) token env tok
 
 let map_import (env : env) (tok : CST.import) =
   (* import *) token env tok
 
 let map_hash_bang_line (env : env) (tok : CST.hash_bang_line) =
   (* pattern #!.* *) token env tok
+
+let map_unescaped_single_jsx_string_fragment (env : env) (tok : CST.unescaped_single_jsx_string_fragment) =
+  (* pattern "([^'&]|&[^#A-Za-z])+" *) token env tok
 
 let map_semicolon (env : env) (x : CST.semicolon) =
   (match x with
@@ -283,57 +286,6 @@ let map_semicolon (env : env) (x : CST.semicolon) =
       (* ";" *) token env tok
     )
   )
-
-let map_jsx_string (env : env) (x : CST.jsx_string) =
-  (match x with
-  | `DQUOT_rep_choice_unes_double_jsx_str_frag_DQUOT (v1, v2, v3) -> R.Case ("DQUOT_rep_choice_unes_double_jsx_str_frag_DQUOT",
-      let v1 = (* "\"" *) token env v1 in
-      let v2 =
-        R.List (List.map (fun x ->
-          (match x with
-          | `Unes_double_jsx_str_frag tok -> R.Case ("Unes_double_jsx_str_frag",
-              (* pattern "([^\"&]|&[^#A-Za-z])+" *) token env tok
-            )
-          | `Html_char_ref tok -> R.Case ("Html_char_ref",
-              (* pattern &(#([xX][0-9a-fA-F]{1,6}|[0-9]{1,5})|[A-Za-z]{1,30}); *) token env tok
-            )
-          )
-        ) v2)
-      in
-      let v3 = (* "\"" *) token env v3 in
-      R.Tuple [v1; v2; v3]
-    )
-  | `SQUOT_rep_choice_unes_single_jsx_str_frag_SQUOT (v1, v2, v3) -> R.Case ("SQUOT_rep_choice_unes_single_jsx_str_frag_SQUOT",
-      let v1 = (* "'" *) token env v1 in
-      let v2 =
-        R.List (List.map (fun x ->
-          (match x with
-          | `Unes_single_jsx_str_frag tok -> R.Case ("Unes_single_jsx_str_frag",
-              (* pattern "([^'&]|&[^#A-Za-z])+" *) token env tok
-            )
-          | `Html_char_ref tok -> R.Case ("Html_char_ref",
-              (* pattern &(#([xX][0-9a-fA-F]{1,6}|[0-9]{1,5})|[A-Za-z]{1,30}); *) token env tok
-            )
-          )
-        ) v2)
-      in
-      let v3 = (* "'" *) token env v3 in
-      R.Tuple [v1; v2; v3]
-    )
-  )
-
-let map_regex (env : env) ((v1, v2, v3, v4) : CST.regex) =
-  let v1 = (* "/" *) token env v1 in
-  let v2 = (* regex_pattern *) token env v2 in
-  let v3 = map_imm_tok_prec_p1_slash env v3 in
-  let v4 =
-    (match v4 with
-    | Some tok -> R.Option (Some (
-        (* pattern [a-z]+ *) token env tok
-      ))
-    | None -> R.Option None)
-  in
-  R.Tuple [v1; v2; v3; v4]
 
 let map_string_ (env : env) (x : CST.string_) =
   (match x with
@@ -364,6 +316,57 @@ let map_string_ (env : env) (x : CST.string_) =
             )
           | `Esc_seq tok -> R.Case ("Esc_seq",
               (* escape_sequence *) token env tok
+            )
+          )
+        ) v2)
+      in
+      let v3 = (* "'" *) token env v3 in
+      R.Tuple [v1; v2; v3]
+    )
+  )
+
+let map_regex (env : env) ((v1, v2, v3, v4) : CST.regex) =
+  let v1 = (* "/" *) token env v1 in
+  let v2 = (* regex_pattern *) token env v2 in
+  let v3 = map_imm_tok_prec_p1_slash env v3 in
+  let v4 =
+    (match v4 with
+    | Some tok -> R.Option (Some (
+        (* pattern [a-z]+ *) token env tok
+      ))
+    | None -> R.Option None)
+  in
+  R.Tuple [v1; v2; v3; v4]
+
+let map_jsx_string (env : env) (x : CST.jsx_string) =
+  (match x with
+  | `DQUOT_rep_choice_unes_double_jsx_str_frag_DQUOT (v1, v2, v3) -> R.Case ("DQUOT_rep_choice_unes_double_jsx_str_frag_DQUOT",
+      let v1 = (* "\"" *) token env v1 in
+      let v2 =
+        R.List (List.map (fun x ->
+          (match x with
+          | `Unes_double_jsx_str_frag tok -> R.Case ("Unes_double_jsx_str_frag",
+              (* pattern "([^\"&]|&[^#A-Za-z])+" *) token env tok
+            )
+          | `Html_char_ref tok -> R.Case ("Html_char_ref",
+              (* pattern &(#([xX][0-9a-fA-F]{1,6}|[0-9]{1,5})|[A-Za-z]{1,30}); *) token env tok
+            )
+          )
+        ) v2)
+      in
+      let v3 = (* "\"" *) token env v3 in
+      R.Tuple [v1; v2; v3]
+    )
+  | `SQUOT_rep_choice_unes_single_jsx_str_frag_SQUOT (v1, v2, v3) -> R.Case ("SQUOT_rep_choice_unes_single_jsx_str_frag_SQUOT",
+      let v1 = (* "'" *) token env v1 in
+      let v2 =
+        R.List (List.map (fun x ->
+          (match x with
+          | `Unes_single_jsx_str_frag tok -> R.Case ("Unes_single_jsx_str_frag",
+              (* pattern "([^'&]|&[^#A-Za-z])+" *) token env tok
+            )
+          | `Html_char_ref tok -> R.Case ("Html_char_ref",
+              (* pattern &(#([xX][0-9a-fA-F]{1,6}|[0-9]{1,5})|[A-Za-z]{1,30}); *) token env tok
             )
           )
         ) v2)
@@ -481,6 +484,30 @@ let map_anon_choice_priv_prop_id_89abb74 (env : env) (x : CST.anon_choice_priv_p
     )
   )
 
+let map_module_export_name (env : env) (x : CST.module_export_name) =
+  (match x with
+  | `Id tok -> R.Case ("Id",
+      (* identifier *) token env tok
+    )
+  | `Str x -> R.Case ("Str",
+      map_string_ env x
+    )
+  )
+
+let map_from_clause (env : env) ((v1, v2) : CST.from_clause) =
+  let v1 = (* "from" *) token env v1 in
+  let v2 = map_string_ env v2 in
+  R.Tuple [v1; v2]
+
+let map_import_require_clause (env : env) ((v1, v2, v3, v4, v5, v6) : CST.import_require_clause) =
+  let v1 = (* identifier *) token env v1 in
+  let v2 = (* "=" *) token env v2 in
+  let v3 = (* "require" *) token env v3 in
+  let v4 = (* "(" *) token env v4 in
+  let v5 = map_string_ env v5 in
+  let v6 = (* ")" *) token env v6 in
+  R.Tuple [v1; v2; v3; v4; v5; v6]
+
 let map_literal_type (env : env) (x : CST.literal_type) =
   (match x with
   | `Num_ (v1, v2) -> R.Case ("Num_",
@@ -507,30 +534,6 @@ let map_literal_type (env : env) (x : CST.literal_type) =
       (* "undefined" *) token env tok
     )
   )
-
-let map_module_export_name (env : env) (x : CST.module_export_name) =
-  (match x with
-  | `Id tok -> R.Case ("Id",
-      (* identifier *) token env tok
-    )
-  | `Str x -> R.Case ("Str",
-      map_string_ env x
-    )
-  )
-
-let map_from_clause (env : env) ((v1, v2) : CST.from_clause) =
-  let v1 = (* "from" *) token env v1 in
-  let v2 = map_string_ env v2 in
-  R.Tuple [v1; v2]
-
-let map_import_require_clause (env : env) ((v1, v2, v3, v4, v5, v6) : CST.import_require_clause) =
-  let v1 = (* identifier *) token env v1 in
-  let v2 = (* "=" *) token env v2 in
-  let v3 = (* "require" *) token env v3 in
-  let v4 = (* "(" *) token env v4 in
-  let v5 = map_string_ env v5 in
-  let v6 = (* ")" *) token env v6 in
-  R.Tuple [v1; v2; v3; v4; v5; v6]
 
 let map_jsx_namespace_name (env : env) ((v1, v2, v3) : CST.jsx_namespace_name) =
   let v1 = map_jsx_identifier_ env v1 in
@@ -2560,17 +2563,27 @@ and map_jsx_attribute_value (env : env) (x : CST.jsx_attribute_value) =
 
 and map_jsx_child (env : env) (x : CST.jsx_child) =
   (match x with
-  | `Jsx_text tok -> R.Case ("Jsx_text",
-      (* jsx_text *) token env tok
+  | `Choice_jsx_text x -> R.Case ("Choice_jsx_text",
+      (match x with
+      | `Jsx_text tok -> R.Case ("Jsx_text",
+          (* jsx_text *) token env tok
+        )
+      | `Html_char_ref tok -> R.Case ("Html_char_ref",
+          (* pattern &(#([xX][0-9a-fA-F]{1,6}|[0-9]{1,5})|[A-Za-z]{1,30}); *) token env tok
+        )
+      | `Choice_jsx_elem x -> R.Case ("Choice_jsx_elem",
+          map_jsx_element_ env x
+        )
+      | `Jsx_exp x -> R.Case ("Jsx_exp",
+          map_jsx_expression env x
+        )
+      )
     )
-  | `Html_char_ref tok -> R.Case ("Html_char_ref",
-      (* pattern &(#([xX][0-9a-fA-F]{1,6}|[0-9]{1,5})|[A-Za-z]{1,30}); *) token env tok
+  | `Semg_ellips tok -> R.Case ("Semg_ellips",
+      (* "..." *) token env tok
     )
-  | `Choice_jsx_elem x -> R.Case ("Choice_jsx_elem",
-      map_jsx_element_ env x
-    )
-  | `Jsx_exp x -> R.Case ("Jsx_exp",
-      map_jsx_expression env x
+  | `Semg_meta tok -> R.Case ("Semg_meta",
+      (* pattern \$[A-Z_][A-Z_0-9]* *) token env tok
     )
   )
 
@@ -4152,6 +4165,16 @@ and map_variable_declarator (env : env) (x : CST.variable_declarator) =
     )
   )
 
+let map_semgrep_pattern (env : env) (x : CST.semgrep_pattern) =
+  (match x with
+  | `Exp x -> R.Case ("Exp",
+      map_expression env x
+    )
+  | `Pair x -> R.Case ("Pair",
+      map_pair env x
+    )
+  )
+
 let map_program (env : env) (x : CST.program) =
   (match x with
   | `Opt_hash_bang_line_rep_stmt (v1, v2) -> R.Case ("Opt_hash_bang_line_rep_stmt",
@@ -4170,7 +4193,7 @@ let map_program (env : env) (x : CST.program) =
     )
   | `Semg_exp (v1, v2) -> R.Case ("Semg_exp",
       let v1 = (* "__SEMGREP_EXPRESSION" *) token env v1 in
-      let v2 = map_expression env v2 in
+      let v2 = map_semgrep_pattern env v2 in
       R.Tuple [v1; v2]
     )
   )
