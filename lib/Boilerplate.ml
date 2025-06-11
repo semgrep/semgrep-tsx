@@ -573,37 +573,44 @@ let map_export_specifier (env : env) ((v1, v2, v3) : CST.export_specifier) =
   in
   R.Tuple [v1; v2; v3]
 
-let map_import_specifier (env : env) ((v1, v2) : CST.import_specifier) =
-  let v1 =
-    (match v1 with
-    | Some x -> R.Option (Some (
-        map_anon_choice_type_2b11f6b env x
-      ))
-    | None -> R.Option None)
-  in
-  let v2 =
-    (match v2 with
-    | `Import_id x -> R.Case ("Import_id",
-        map_import_identifier env x
-      )
-    | `Choice_module_export_name_as_import_id (v1, v2, v3) -> R.Case ("Choice_module_export_name_as_import_id",
-        let v1 =
-          (match v1 with
-          | `Module_export_name x -> R.Case ("Module_export_name",
-              map_module_export_name env x
-            )
-          | `Type tok -> R.Case ("Type",
-              (* "type" *) token env tok
-            )
+let map_import_specifier (env : env) (x : CST.import_specifier) =
+  (match x with
+  | `Opt_choice_type_choice_import_id (v1, v2) -> R.Case ("Opt_choice_type_choice_import_id",
+      let v1 =
+        (match v1 with
+        | Some x -> R.Option (Some (
+            map_anon_choice_type_2b11f6b env x
+          ))
+        | None -> R.Option None)
+      in
+      let v2 =
+        (match v2 with
+        | `Import_id x -> R.Case ("Import_id",
+            map_import_identifier env x
           )
-        in
-        let v2 = (* "as" *) token env v2 in
-        let v3 = map_import_identifier env v3 in
-        R.Tuple [v1; v2; v3]
-      )
+        | `Choice_module_export_name_as_import_id (v1, v2, v3) -> R.Case ("Choice_module_export_name_as_import_id",
+            let v1 =
+              (match v1 with
+              | `Module_export_name x -> R.Case ("Module_export_name",
+                  map_module_export_name env x
+                )
+              | `Type tok -> R.Case ("Type",
+                  (* "type" *) token env tok
+                )
+              )
+            in
+            let v2 = (* "as" *) token env v2 in
+            let v3 = map_import_identifier env v3 in
+            R.Tuple [v1; v2; v3]
+          )
+        )
+      in
+      R.Tuple [v1; v2]
     )
-  in
-  R.Tuple [v1; v2]
+  | `Semg_ellips tok -> R.Case ("Semg_ellips",
+      (* "..." *) token env tok
+    )
+  )
 
 let map_jsx_attribute_name (env : env) (x : CST.jsx_attribute_name) =
   (match x with
@@ -2713,7 +2720,19 @@ and map_member_expression (env : env) ((v1, v2, v3) : CST.member_expression) =
       )
     )
   in
-  let v3 = map_anon_choice_priv_prop_id_89abb74 env v3 in
+  let v3 =
+    (match v3 with
+    | `Priv_prop_id tok -> R.Case ("Priv_prop_id",
+        (* private_property_identifier *) token env tok
+      )
+    | `Id tok -> R.Case ("Id",
+        (* identifier *) token env tok
+      )
+    | `Semg_ellips tok -> R.Case ("Semg_ellips",
+        (* "..." *) token env tok
+      )
+    )
+  in
   R.Tuple [v1; v2; v3]
 
 and map_method_definition (env : env) ((v1, v2, v3, v4, v5, v6, v7, v8, v9, v10) : CST.method_definition) =

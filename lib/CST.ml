@@ -288,20 +288,23 @@ type export_specifier = (
   * (Token.t (* "as" *) * module_export_name) option
 )
 
-type import_specifier = (
-    anon_choice_type_2b11f6b option
-  * [
-        `Import_id of import_identifier
-      | `Choice_module_export_name_as_import_id of (
-            [
-                `Module_export_name of module_export_name
-              | `Type of Token.t (* "type" *)
-            ]
-          * Token.t (* "as" *)
-          * import_identifier
-        )
-    ]
-)
+type import_specifier = [
+    `Opt_choice_type_choice_import_id of (
+        anon_choice_type_2b11f6b option
+      * [
+            `Import_id of import_identifier
+          | `Choice_module_export_name_as_import_id of (
+                [
+                    `Module_export_name of module_export_name
+                  | `Type of Token.t (* "type" *)
+                ]
+              * Token.t (* "as" *)
+              * import_identifier
+            )
+        ]
+    )
+  | `Semg_ellips of Token.t (* "..." *)
+]
 
 type jsx_attribute_name = [
     `Choice_jsx_id of jsx_identifier_
@@ -1142,7 +1145,11 @@ and member_expression = (
       | `Import of import (*tok*)
     ]
   * [ `DOT of Token.t (* "." *) | `Opt_chain of Token.t (* "?." *) ]
-  * anon_choice_priv_prop_id_89abb74
+  * [
+        `Priv_prop_id of private_property_identifier (*tok*)
+      | `Id of identifier (*tok*)
+      | `Semg_ellips of Token.t (* "..." *)
+    ]
 )
 
 and method_definition = (
