@@ -3078,11 +3078,18 @@ and map_parenthesized_expression (env : env) ((v1, v2, v3) : CST.parenthesized_e
 
 and map_pattern (env : env) (x : CST.pattern) =
   (match x with
-  | `Choice_choice_member_exp x -> R.Case ("Choice_choice_member_exp",
-      map_lhs_expression env x
+  | `Choice_choice_choice_member_exp x -> R.Case ("Choice_choice_choice_member_exp",
+      (match x with
+      | `Choice_choice_member_exp x -> R.Case ("Choice_choice_member_exp",
+          map_lhs_expression env x
+        )
+      | `Rest_pat x -> R.Case ("Rest_pat",
+          map_rest_pattern env x
+        )
+      )
     )
-  | `Rest_pat x -> R.Case ("Rest_pat",
-      map_rest_pattern env x
+  | `Semg_ellips tok -> R.Case ("Semg_ellips",
+      (* "..." *) token env tok
     )
   )
 
