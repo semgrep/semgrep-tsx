@@ -1751,7 +1751,6 @@ type method_pattern = [
     `Abst_meth_sign of abstract_method_signature
   | `Index_sign of index_signature
   | `Meth_sign of method_signature
-  | `Public_field_defi of public_field_definition
   | `Rep_deco_meth_defi_opt_choice_auto_semi of (
         decorator list (* zero or more *)
       * method_definition

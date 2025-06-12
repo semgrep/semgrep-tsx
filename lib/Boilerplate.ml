@@ -4296,9 +4296,6 @@ let map_method_pattern (env : env) (x : CST.method_pattern) =
   | `Meth_sign x -> R.Case ("Meth_sign",
       map_method_signature env x
     )
-  | `Public_field_defi x -> R.Case ("Public_field_defi",
-      map_public_field_definition env x
-    )
   | `Rep_deco_meth_defi_opt_choice_auto_semi (v1, v2, v3) -> R.Case ("Rep_deco_meth_defi_opt_choice_auto_semi",
       let v1 = R.List (List.map (map_decorator env) v1) in
       let v2 = map_method_definition env v2 in

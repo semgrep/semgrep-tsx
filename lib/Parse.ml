@@ -3641,7 +3641,6 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Name "abstract_method_signature");
       Token (Name "index_signature");
       Token (Name "method_signature");
-      Token (Name "public_field_definition");
       Seq [
         Repeat (
           Token (Name "decorator");
@@ -12768,10 +12767,6 @@ let trans_method_pattern ((kind, body) : mt) : CST.method_pattern =
             trans_method_signature (Run.matcher_token v)
           )
       | Alt (3, v) ->
-          `Public_field_defi (
-            trans_public_field_definition (Run.matcher_token v)
-          )
-      | Alt (4, v) ->
           `Rep_deco_meth_defi_opt_choice_auto_semi (
             (match v with
             | Seq [v0; v1; v2] ->
