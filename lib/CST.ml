@@ -285,7 +285,10 @@ type import_require_clause = (
   * Token.t (* "(" *) * string_ * Token.t (* ")" *)
 )
 
-type from_clause = (Token.t (* "from" *) * string_)
+type from_clause = (
+    Token.t (* "from" *)
+  * [ `Str of string_ | `Semg_meta of semgrep_metavariable (*tok*) ]
+)
 
 type nested_type_identifier = (
     anon_choice_type_id_42c0412 * Token.t (* "." *) * identifier (*tok*)
@@ -1747,10 +1750,12 @@ and with_statement = (
     Token.t (* "with" *) * parenthesized_expression * statement
 )
 
-type semgrep_pattern = [
-    `Exp of expression
-  | `Pair of pair
-  | `Meth_pat of (
+type method_pattern = [
+    `Rep1_deco_public_field_defi of (
+        decorator list (* one or more *)
+      * public_field_definition
+    )
+  | `Rep_deco_choice_abst_meth_sign of (
         decorator list (* zero or more *)
       * [
             `Abst_meth_sign of abstract_method_signature
@@ -1762,6 +1767,12 @@ type semgrep_pattern = [
             )
         ]
     )
+]
+
+type semgrep_pattern = [
+    `Exp of expression
+  | `Pair of pair
+  | `Meth_pat of method_pattern
   | `Func_decl_pat of (
         Token.t (* "async" *) option
       * Token.t (* "function" *)
@@ -1770,6 +1781,8 @@ type semgrep_pattern = [
       * statement_block
       * automatic_semicolon (*tok*) option
     )
+  | `Fina_clause of finally_clause
+  | `Catch_clause of catch_clause
 ]
 
 type program = [
@@ -2155,19 +2168,6 @@ type function_declaration_pattern (* inlined *) = (
   * call_signature_
   * statement_block
   * automatic_semicolon (*tok*) option
-)
-
-type method_pattern (* inlined *) = (
-    decorator list (* zero or more *)
-  * [
-        `Abst_meth_sign of abstract_method_signature
-      | `Index_sign of index_signature
-      | `Meth_sign of method_signature
-      | `Meth_defi_opt_choice_auto_semi of (
-            method_definition
-          * semicolon option
-        )
-    ]
 )
 
 type semgrep_expression (* inlined *) = (

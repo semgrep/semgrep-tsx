@@ -315,7 +315,10 @@ let children_regexps : (string * Run.exp option) list = [
   Some (
     Seq [
       Token (Literal "from");
-      Token (Name "string");
+      Alt [|
+        Token (Name "string");
+        Token (Name "semgrep_metavariable");
+      |];
     ];
   );
   "module_export_name",
@@ -3637,25 +3640,33 @@ let children_regexps : (string * Run.exp option) list = [
   );
   "method_pattern",
   Some (
-    Seq [
-      Repeat (
-        Token (Name "decorator");
-      );
-      Alt [|
-        Token (Name "abstract_method_signature");
-        Token (Name "index_signature");
-        Token (Name "method_signature");
-        Seq [
-          Token (Name "method_definition");
-          Opt (
-            Alt [|
-              Token (Name "automatic_semicolon");
-              Token (Literal ";");
-            |];
-          );
-        ];
-      |];
-    ];
+    Alt [|
+      Seq [
+        Repeat1 (
+          Token (Name "decorator");
+        );
+        Token (Name "public_field_definition");
+      ];
+      Seq [
+        Repeat (
+          Token (Name "decorator");
+        );
+        Alt [|
+          Token (Name "abstract_method_signature");
+          Token (Name "index_signature");
+          Token (Name "method_signature");
+          Seq [
+            Token (Name "method_definition");
+            Opt (
+              Alt [|
+                Token (Name "automatic_semicolon");
+                Token (Literal ";");
+              |];
+            );
+          ];
+        |];
+      ];
+    |];
   );
   "function_declaration_pattern",
   Some (
@@ -3682,6 +3693,8 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Name "pair");
       Token (Name "method_pattern");
       Token (Name "function_declaration_pattern");
+      Token (Name "finally_clause");
+      Token (Name "catch_clause");
     |];
   );
   "semgrep_expression",
@@ -4472,7 +4485,17 @@ let trans_from_clause ((kind, body) : mt) : CST.from_clause =
       | Seq [v0; v1] ->
           (
             Run.trans_token (Run.matcher_token v0),
-            trans_string_ (Run.matcher_token v1)
+            (match v1 with
+            | Alt (0, v) ->
+                `Str (
+                  trans_string_ (Run.matcher_token v)
+                )
+            | Alt (1, v) ->
+                `Semg_meta (
+                  trans_semgrep_metavariable (Run.matcher_token v)
+                )
+            | _ -> assert false
+            )
           )
       | _ -> assert false
       )
@@ -12756,46 +12779,66 @@ let trans_method_pattern ((kind, body) : mt) : CST.method_pattern =
   match body with
   | Children v ->
       (match v with
-      | Seq [v0; v1] ->
-          (
-            Run.repeat
-              (fun v -> trans_decorator (Run.matcher_token v))
-              v0
-            ,
-            (match v1 with
-            | Alt (0, v) ->
-                `Abst_meth_sign (
-                  trans_abstract_method_signature (Run.matcher_token v)
+      | Alt (0, v) ->
+          `Rep1_deco_public_field_defi (
+            (match v with
+            | Seq [v0; v1] ->
+                (
+                  Run.repeat1
+                    (fun v -> trans_decorator (Run.matcher_token v))
+                    v0
+                  ,
+                  trans_public_field_definition (Run.matcher_token v1)
                 )
-            | Alt (1, v) ->
-                `Index_sign (
-                  trans_index_signature (Run.matcher_token v)
-                )
-            | Alt (2, v) ->
-                `Meth_sign (
-                  trans_method_signature (Run.matcher_token v)
-                )
-            | Alt (3, v) ->
-                `Meth_defi_opt_choice_auto_semi (
-                  (match v with
-                  | Seq [v0; v1] ->
-                      (
-                        trans_method_definition (Run.matcher_token v0),
-                        Run.opt
-                          (fun v ->
-                            (match v with
-                            | Alt (0, v) ->
-                                `Auto_semi (
-                                  trans_automatic_semicolon (Run.matcher_token v)
+            | _ -> assert false
+            )
+          )
+      | Alt (1, v) ->
+          `Rep_deco_choice_abst_meth_sign (
+            (match v with
+            | Seq [v0; v1] ->
+                (
+                  Run.repeat
+                    (fun v -> trans_decorator (Run.matcher_token v))
+                    v0
+                  ,
+                  (match v1 with
+                  | Alt (0, v) ->
+                      `Abst_meth_sign (
+                        trans_abstract_method_signature (Run.matcher_token v)
+                      )
+                  | Alt (1, v) ->
+                      `Index_sign (
+                        trans_index_signature (Run.matcher_token v)
+                      )
+                  | Alt (2, v) ->
+                      `Meth_sign (
+                        trans_method_signature (Run.matcher_token v)
+                      )
+                  | Alt (3, v) ->
+                      `Meth_defi_opt_choice_auto_semi (
+                        (match v with
+                        | Seq [v0; v1] ->
+                            (
+                              trans_method_definition (Run.matcher_token v0),
+                              Run.opt
+                                (fun v ->
+                                  (match v with
+                                  | Alt (0, v) ->
+                                      `Auto_semi (
+                                        trans_automatic_semicolon (Run.matcher_token v)
+                                      )
+                                  | Alt (1, v) ->
+                                      `SEMI (
+                                        Run.trans_token (Run.matcher_token v)
+                                      )
+                                  | _ -> assert false
+                                  )
                                 )
-                            | Alt (1, v) ->
-                                `SEMI (
-                                  Run.trans_token (Run.matcher_token v)
-                                )
-                            | _ -> assert false
+                                v1
                             )
-                          )
-                          v1
+                        | _ -> assert false
+                        )
                       )
                   | _ -> assert false
                   )
@@ -12869,6 +12912,14 @@ let trans_semgrep_pattern ((kind, body) : mt) : CST.semgrep_pattern =
       | Alt (3, v) ->
           `Func_decl_pat (
             trans_function_declaration_pattern (Run.matcher_token v)
+          )
+      | Alt (4, v) ->
+          `Fina_clause (
+            trans_finally_clause (Run.matcher_token v)
+          )
+      | Alt (5, v) ->
+          `Catch_clause (
+            trans_catch_clause (Run.matcher_token v)
           )
       | _ -> assert false
       )
