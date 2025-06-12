@@ -118,7 +118,6 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
     switch (lexer->lookahead) {
         case '`':
         case ',':
-        case '.':
         case ';':
         case '*':
         case '%':
@@ -132,6 +131,11 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols, 
         case '/':
         case ':':
             return false;
+
+        case '.':
+            // sgrep-ext:
+            skip(lexer);
+            return lexer->lookahead == '.';
 
         case '{':
             if (valid_symbols[FUNCTION_SIGNATURE_AUTOMATIC_SEMICOLON]) {
