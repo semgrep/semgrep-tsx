@@ -1771,7 +1771,7 @@ type method_pattern = [
 
 type semgrep_pattern = [
     `Exp of expression
-  | `Pair of pair
+  | `Pair_opt_COMMA of (pair * Token.t (* "," *) option)
   | `Meth_pat of method_pattern
   | `Func_decl_pat of (
         Token.t (* "async" *) option
