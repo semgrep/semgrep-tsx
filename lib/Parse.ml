@@ -3637,23 +3637,25 @@ let children_regexps : (string * Run.exp option) list = [
   );
   "method_pattern",
   Some (
-    Alt [|
-      Token (Name "abstract_method_signature");
-      Token (Name "index_signature");
-      Token (Name "method_signature");
-      Seq [
-        Repeat (
-          Token (Name "decorator");
-        );
-        Token (Name "method_definition");
-        Opt (
-          Alt [|
-            Token (Name "automatic_semicolon");
-            Token (Literal ";");
-          |];
-        );
-      ];
-    |];
+    Seq [
+      Repeat (
+        Token (Name "decorator");
+      );
+      Alt [|
+        Token (Name "abstract_method_signature");
+        Token (Name "index_signature");
+        Token (Name "method_signature");
+        Seq [
+          Token (Name "method_definition");
+          Opt (
+            Alt [|
+              Token (Name "automatic_semicolon");
+              Token (Literal ";");
+            |];
+          );
+        ];
+      |];
+    ];
   );
   "function_declaration_pattern",
   Some (
@@ -12754,43 +12756,49 @@ let trans_method_pattern ((kind, body) : mt) : CST.method_pattern =
   match body with
   | Children v ->
       (match v with
-      | Alt (0, v) ->
-          `Abst_meth_sign (
-            trans_abstract_method_signature (Run.matcher_token v)
-          )
-      | Alt (1, v) ->
-          `Index_sign (
-            trans_index_signature (Run.matcher_token v)
-          )
-      | Alt (2, v) ->
-          `Meth_sign (
-            trans_method_signature (Run.matcher_token v)
-          )
-      | Alt (3, v) ->
-          `Rep_deco_meth_defi_opt_choice_auto_semi (
-            (match v with
-            | Seq [v0; v1; v2] ->
-                (
-                  Run.repeat
-                    (fun v -> trans_decorator (Run.matcher_token v))
-                    v0
-                  ,
-                  trans_method_definition (Run.matcher_token v1),
-                  Run.opt
-                    (fun v ->
-                      (match v with
-                      | Alt (0, v) ->
-                          `Auto_semi (
-                            trans_automatic_semicolon (Run.matcher_token v)
+      | Seq [v0; v1] ->
+          (
+            Run.repeat
+              (fun v -> trans_decorator (Run.matcher_token v))
+              v0
+            ,
+            (match v1 with
+            | Alt (0, v) ->
+                `Abst_meth_sign (
+                  trans_abstract_method_signature (Run.matcher_token v)
+                )
+            | Alt (1, v) ->
+                `Index_sign (
+                  trans_index_signature (Run.matcher_token v)
+                )
+            | Alt (2, v) ->
+                `Meth_sign (
+                  trans_method_signature (Run.matcher_token v)
+                )
+            | Alt (3, v) ->
+                `Meth_defi_opt_choice_auto_semi (
+                  (match v with
+                  | Seq [v0; v1] ->
+                      (
+                        trans_method_definition (Run.matcher_token v0),
+                        Run.opt
+                          (fun v ->
+                            (match v with
+                            | Alt (0, v) ->
+                                `Auto_semi (
+                                  trans_automatic_semicolon (Run.matcher_token v)
+                                )
+                            | Alt (1, v) ->
+                                `SEMI (
+                                  Run.trans_token (Run.matcher_token v)
+                                )
+                            | _ -> assert false
+                            )
                           )
-                      | Alt (1, v) ->
-                          `SEMI (
-                            Run.trans_token (Run.matcher_token v)
-                          )
-                      | _ -> assert false
+                          v1
                       )
-                    )
-                    v2
+                  | _ -> assert false
+                  )
                 )
             | _ -> assert false
             )

@@ -1747,21 +1747,21 @@ and with_statement = (
     Token.t (* "with" *) * parenthesized_expression * statement
 )
 
-type method_pattern = [
-    `Abst_meth_sign of abstract_method_signature
-  | `Index_sign of index_signature
-  | `Meth_sign of method_signature
-  | `Rep_deco_meth_defi_opt_choice_auto_semi of (
-        decorator list (* zero or more *)
-      * method_definition
-      * semicolon option
-    )
-]
-
 type semgrep_pattern = [
     `Exp of expression
   | `Pair of pair
-  | `Meth_pat of method_pattern
+  | `Meth_pat of (
+        decorator list (* zero or more *)
+      * [
+            `Abst_meth_sign of abstract_method_signature
+          | `Index_sign of index_signature
+          | `Meth_sign of method_signature
+          | `Meth_defi_opt_choice_auto_semi of (
+                method_definition
+              * semicolon option
+            )
+        ]
+    )
   | `Func_decl_pat of (
         Token.t (* "async" *) option
       * Token.t (* "function" *)
@@ -2155,6 +2155,19 @@ type function_declaration_pattern (* inlined *) = (
   * call_signature_
   * statement_block
   * automatic_semicolon (*tok*) option
+)
+
+type method_pattern (* inlined *) = (
+    decorator list (* zero or more *)
+  * [
+        `Abst_meth_sign of abstract_method_signature
+      | `Index_sign of index_signature
+      | `Meth_sign of method_signature
+      | `Meth_defi_opt_choice_auto_semi of (
+            method_definition
+          * semicolon option
+        )
+    ]
 )
 
 type semgrep_expression (* inlined *) = (

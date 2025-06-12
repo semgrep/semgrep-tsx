@@ -4285,31 +4285,6 @@ and map_with_statement (env : env) ((v1, v2, v3) : CST.with_statement) =
   let v3 = map_statement env v3 in
   R.Tuple [v1; v2; v3]
 
-let map_method_pattern (env : env) (x : CST.method_pattern) =
-  (match x with
-  | `Abst_meth_sign x -> R.Case ("Abst_meth_sign",
-      map_abstract_method_signature env x
-    )
-  | `Index_sign x -> R.Case ("Index_sign",
-      map_index_signature env x
-    )
-  | `Meth_sign x -> R.Case ("Meth_sign",
-      map_method_signature env x
-    )
-  | `Rep_deco_meth_defi_opt_choice_auto_semi (v1, v2, v3) -> R.Case ("Rep_deco_meth_defi_opt_choice_auto_semi",
-      let v1 = R.List (List.map (map_decorator env) v1) in
-      let v2 = map_method_definition env v2 in
-      let v3 =
-        (match v3 with
-        | Some x -> R.Option (Some (
-            map_semicolon env x
-          ))
-        | None -> R.Option None)
-      in
-      R.Tuple [v1; v2; v3]
-    )
-  )
-
 let map_semgrep_pattern (env : env) (x : CST.semgrep_pattern) =
   (match x with
   | `Exp x -> R.Case ("Exp",
@@ -4318,8 +4293,33 @@ let map_semgrep_pattern (env : env) (x : CST.semgrep_pattern) =
   | `Pair x -> R.Case ("Pair",
       map_pair env x
     )
-  | `Meth_pat x -> R.Case ("Meth_pat",
-      map_method_pattern env x
+  | `Meth_pat (v1, v2) -> R.Case ("Meth_pat",
+      let v1 = R.List (List.map (map_decorator env) v1) in
+      let v2 =
+        (match v2 with
+        | `Abst_meth_sign x -> R.Case ("Abst_meth_sign",
+            map_abstract_method_signature env x
+          )
+        | `Index_sign x -> R.Case ("Index_sign",
+            map_index_signature env x
+          )
+        | `Meth_sign x -> R.Case ("Meth_sign",
+            map_method_signature env x
+          )
+        | `Meth_defi_opt_choice_auto_semi (v1, v2) -> R.Case ("Meth_defi_opt_choice_auto_semi",
+            let v1 = map_method_definition env v1 in
+            let v2 =
+              (match v2 with
+              | Some x -> R.Option (Some (
+                  map_semicolon env x
+                ))
+              | None -> R.Option None)
+            in
+            R.Tuple [v1; v2]
+          )
+        )
+      in
+      R.Tuple [v1; v2]
     )
   | `Func_decl_pat (v1, v2, v3, v4, v5, v6) -> R.Case ("Func_decl_pat",
       let v1 =
