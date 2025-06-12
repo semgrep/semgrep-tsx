@@ -991,18 +991,21 @@ and for_statement = (
     Token.t (* "for" *)
   * Token.t (* "(" *)
   * [
-        `Choice_lexi_decl of [
-            `Lexi_decl of lexical_declaration
-          | `Var_decl of variable_declaration
+        `Semg_ellips of Token.t (* "..." *)
+      | `Choice_choice_lexi_decl of [
+            `Choice_lexi_decl of [
+                `Lexi_decl of lexical_declaration
+              | `Var_decl of variable_declaration
+            ]
+          | `Choice_exp_SEMI of (expressions * Token.t (* ";" *))
+          | `Empty_stmt of Token.t (* ";" *)
         ]
-      | `Choice_exp_SEMI of (expressions * Token.t (* ";" *))
-      | `Empty_stmt of Token.t (* ";" *)
+      | `Choice_choice_exp_SEMI of [
+            `Choice_exp_SEMI of (expressions * Token.t (* ";" *))
+          | `Empty_stmt of Token.t (* ";" *)
+        ]
+      | `Opt_choice_exp of expressions option
     ]
-  * [
-        `Choice_exp_SEMI of (expressions * Token.t (* ";" *))
-      | `Empty_stmt of Token.t (* ";" *)
-    ]
-  * expressions option
   * Token.t (* ")" *)
   * statement
 )
