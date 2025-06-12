@@ -2045,8 +2045,11 @@ let children_regexps : (string * Run.exp option) list = [
           |];
           Repeat (
             Alt [|
-              Token (Name "jsx_attribute");
-              Token (Name "jsx_expression");
+              Alt [|
+                Token (Name "jsx_attribute");
+                Token (Name "jsx_expression");
+              |];
+              Token (Name "semgrep_ellipsis");
             |];
           );
         ];
@@ -2080,8 +2083,11 @@ let children_regexps : (string * Run.exp option) list = [
           |];
           Repeat (
             Alt [|
-              Token (Name "jsx_attribute");
-              Token (Name "jsx_expression");
+              Alt [|
+                Token (Name "jsx_attribute");
+                Token (Name "jsx_expression");
+              |];
+              Token (Name "semgrep_ellipsis");
             |];
           );
         ];
@@ -8595,12 +8601,22 @@ and trans_jsx_opening_element ((kind, body) : mt) : CST.jsx_opening_element =
                         (fun v ->
                           (match v with
                           | Alt (0, v) ->
-                              `Jsx_attr (
-                                trans_jsx_attribute (Run.matcher_token v)
+                              `Choice_jsx_attr (
+                                (match v with
+                                | Alt (0, v) ->
+                                    `Jsx_attr (
+                                      trans_jsx_attribute (Run.matcher_token v)
+                                    )
+                                | Alt (1, v) ->
+                                    `Jsx_exp (
+                                      trans_jsx_expression (Run.matcher_token v)
+                                    )
+                                | _ -> assert false
+                                )
                               )
                           | Alt (1, v) ->
-                              `Jsx_exp (
-                                trans_jsx_expression (Run.matcher_token v)
+                              `Semg_ellips (
+                                trans_semgrep_ellipsis (Run.matcher_token v)
                               )
                           | _ -> assert false
                           )
@@ -8686,12 +8702,22 @@ and trans_jsx_self_closing_element ((kind, body) : mt) : CST.jsx_self_closing_el
                         (fun v ->
                           (match v with
                           | Alt (0, v) ->
-                              `Jsx_attr (
-                                trans_jsx_attribute (Run.matcher_token v)
+                              `Choice_jsx_attr (
+                                (match v with
+                                | Alt (0, v) ->
+                                    `Jsx_attr (
+                                      trans_jsx_attribute (Run.matcher_token v)
+                                    )
+                                | Alt (1, v) ->
+                                    `Jsx_exp (
+                                      trans_jsx_expression (Run.matcher_token v)
+                                    )
+                                | _ -> assert false
+                                )
                               )
                           | Alt (1, v) ->
-                              `Jsx_exp (
-                                trans_jsx_expression (Run.matcher_token v)
+                              `Semg_ellips (
+                                trans_semgrep_ellipsis (Run.matcher_token v)
                               )
                           | _ -> assert false
                           )

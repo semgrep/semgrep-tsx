@@ -2535,23 +2535,33 @@ and map_internal_module (env : env) ((v1, v2) : CST.internal_module) =
   let v2 = map_module__ env v2 in
   R.Tuple [v1; v2]
 
+and map_jsx_attribute (env : env) ((v1, v2) : CST.jsx_attribute) =
+  let v1 = map_jsx_attribute_name env v1 in
+  let v2 =
+    (match v2 with
+    | Some (v1, v2) -> R.Option (Some (
+        let v1 = (* "=" *) token env v1 in
+        let v2 = map_jsx_attribute_value env v2 in
+        R.Tuple [v1; v2]
+      ))
+    | None -> R.Option None)
+  in
+  R.Tuple [v1; v2]
+
 and map_jsx_attribute_ (env : env) (x : CST.jsx_attribute_) =
   (match x with
-  | `Jsx_attr (v1, v2) -> R.Case ("Jsx_attr",
-      let v1 = map_jsx_attribute_name env v1 in
-      let v2 =
-        (match v2 with
-        | Some (v1, v2) -> R.Option (Some (
-            let v1 = (* "=" *) token env v1 in
-            let v2 = map_jsx_attribute_value env v2 in
-            R.Tuple [v1; v2]
-          ))
-        | None -> R.Option None)
-      in
-      R.Tuple [v1; v2]
+  | `Choice_jsx_attr x -> R.Case ("Choice_jsx_attr",
+      (match x with
+      | `Jsx_attr x -> R.Case ("Jsx_attr",
+          map_jsx_attribute env x
+        )
+      | `Jsx_exp x -> R.Case ("Jsx_exp",
+          map_jsx_expression env x
+        )
+      )
     )
-  | `Jsx_exp x -> R.Case ("Jsx_exp",
-      map_jsx_expression env x
+  | `Semg_ellips tok -> R.Case ("Semg_ellips",
+      (* "..." *) token env tok
     )
   )
 

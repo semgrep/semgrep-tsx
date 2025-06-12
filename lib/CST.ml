@@ -1059,12 +1059,17 @@ and initializer_ = (Token.t (* "=" *) * expression)
 
 and internal_module = (Token.t (* "namespace" *) * module__)
 
+and jsx_attribute = (
+    jsx_attribute_name
+  * (Token.t (* "=" *) * jsx_attribute_value) option
+)
+
 and jsx_attribute_ = [
-    `Jsx_attr of (
-        jsx_attribute_name
-      * (Token.t (* "=" *) * jsx_attribute_value) option
-    )
-  | `Jsx_exp of jsx_expression
+    `Choice_jsx_attr of [
+        `Jsx_attr of jsx_attribute
+      | `Jsx_exp of jsx_expression
+    ]
+  | `Semg_ellips of Token.t (* "..." *)
 ]
 
 and jsx_attribute_value = [
@@ -1986,11 +1991,6 @@ type intersection_type (* inlined *) = (
     type_ option
   * Token.t (* "&" *)
   * type_
-)
-
-type jsx_attribute (* inlined *) = (
-    jsx_attribute_name
-  * (Token.t (* "=" *) * jsx_attribute_value) option
 )
 
 type jsx_element (* inlined *) = (
