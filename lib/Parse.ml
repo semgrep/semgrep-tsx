@@ -1972,12 +1972,15 @@ let children_regexps : (string * Run.exp option) list = [
         Seq [
           Token (Literal "=");
           Alt [|
-            Token (Name "jsx_string");
-            Token (Name "jsx_expression");
             Alt [|
-              Token (Name "jsx_element");
-              Token (Name "jsx_self_closing_element");
+              Token (Name "jsx_string");
+              Token (Name "jsx_expression");
+              Alt [|
+                Token (Name "jsx_element");
+                Token (Name "jsx_self_closing_element");
+              |];
             |];
+            Token (Name "semgrep_metavariable");
           |];
         ];
       );
@@ -8406,26 +8409,36 @@ and trans_jsx_attribute ((kind, body) : mt) : CST.jsx_attribute =
                       Run.trans_token (Run.matcher_token v0),
                       (match v1 with
                       | Alt (0, v) ->
-                          `Jsx_str (
-                            trans_jsx_string (Run.matcher_token v)
-                          )
-                      | Alt (1, v) ->
-                          `Jsx_exp (
-                            trans_jsx_expression (Run.matcher_token v)
-                          )
-                      | Alt (2, v) ->
-                          `Choice_jsx_elem (
+                          `Choice_jsx_str (
                             (match v with
                             | Alt (0, v) ->
-                                `Jsx_elem (
-                                  trans_jsx_element (Run.matcher_token v)
+                                `Jsx_str (
+                                  trans_jsx_string (Run.matcher_token v)
                                 )
                             | Alt (1, v) ->
-                                `Jsx_self_clos_elem (
-                                  trans_jsx_self_closing_element (Run.matcher_token v)
+                                `Jsx_exp (
+                                  trans_jsx_expression (Run.matcher_token v)
+                                )
+                            | Alt (2, v) ->
+                                `Choice_jsx_elem (
+                                  (match v with
+                                  | Alt (0, v) ->
+                                      `Jsx_elem (
+                                        trans_jsx_element (Run.matcher_token v)
+                                      )
+                                  | Alt (1, v) ->
+                                      `Jsx_self_clos_elem (
+                                        trans_jsx_self_closing_element (Run.matcher_token v)
+                                      )
+                                  | _ -> assert false
+                                  )
                                 )
                             | _ -> assert false
                             )
+                          )
+                      | Alt (1, v) ->
+                          `Semg_meta (
+                            trans_semgrep_metavariable (Run.matcher_token v)
                           )
                       | _ -> assert false
                       )

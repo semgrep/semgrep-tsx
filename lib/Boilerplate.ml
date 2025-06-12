@@ -2567,14 +2567,21 @@ and map_jsx_attribute_ (env : env) (x : CST.jsx_attribute_) =
 
 and map_jsx_attribute_value (env : env) (x : CST.jsx_attribute_value) =
   (match x with
-  | `Jsx_str x -> R.Case ("Jsx_str",
-      map_jsx_string env x
+  | `Choice_jsx_str x -> R.Case ("Choice_jsx_str",
+      (match x with
+      | `Jsx_str x -> R.Case ("Jsx_str",
+          map_jsx_string env x
+        )
+      | `Jsx_exp x -> R.Case ("Jsx_exp",
+          map_jsx_expression env x
+        )
+      | `Choice_jsx_elem x -> R.Case ("Choice_jsx_elem",
+          map_jsx_element_ env x
+        )
+      )
     )
-  | `Jsx_exp x -> R.Case ("Jsx_exp",
-      map_jsx_expression env x
-    )
-  | `Choice_jsx_elem x -> R.Case ("Choice_jsx_elem",
-      map_jsx_element_ env x
+  | `Semg_meta tok -> R.Case ("Semg_meta",
+      (* pattern \$[A-Z_][A-Z_0-9]* *) token env tok
     )
   )
 

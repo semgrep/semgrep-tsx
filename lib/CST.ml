@@ -1073,9 +1073,12 @@ and jsx_attribute_ = [
 ]
 
 and jsx_attribute_value = [
-    `Jsx_str of jsx_string
-  | `Jsx_exp of jsx_expression
-  | `Choice_jsx_elem of jsx_element_
+    `Choice_jsx_str of [
+        `Jsx_str of jsx_string
+      | `Jsx_exp of jsx_expression
+      | `Choice_jsx_elem of jsx_element_
+    ]
+  | `Semg_meta of semgrep_metavariable (*tok*)
 ]
 
 and jsx_child = [
