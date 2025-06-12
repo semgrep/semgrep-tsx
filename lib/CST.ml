@@ -1758,6 +1758,14 @@ type semgrep_pattern = [
     `Exp of expression
   | `Pair of pair
   | `Meth_pat of method_pattern
+  | `Func_decl_pat of (
+        Token.t (* "async" *) option
+      * Token.t (* "function" *)
+      * [ `Id of identifier (*tok*) | `Semg_ellips of Token.t (* "..." *) ]
+      * call_signature_
+      * statement_block
+      * automatic_semicolon (*tok*) option
+    )
 ]
 
 type program = [
@@ -2139,7 +2147,7 @@ type jsx_start_opening_element (* inlined *) = (
 type function_declaration_pattern (* inlined *) = (
     Token.t (* "async" *) option
   * Token.t (* "function" *)
-  * identifier (*tok*)
+  * [ `Id of identifier (*tok*) | `Semg_ellips of Token.t (* "..." *) ]
   * call_signature_
   * statement_block
   * automatic_semicolon (*tok*) option

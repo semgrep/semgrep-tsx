@@ -3651,12 +3651,31 @@ let children_regexps : (string * Run.exp option) list = [
       ];
     |];
   );
+  "function_declaration_pattern",
+  Some (
+    Seq [
+      Opt (
+        Token (Literal "async");
+      );
+      Token (Literal "function");
+      Alt [|
+        Token (Name "identifier");
+        Token (Name "semgrep_ellipsis");
+      |];
+      Token (Name "call_signature");
+      Token (Name "statement_block");
+      Opt (
+        Token (Name "automatic_semicolon");
+      );
+    ];
+  );
   "semgrep_pattern",
   Some (
     Alt [|
       Token (Name "expression");
       Token (Name "pair");
       Token (Name "method_pattern");
+      Token (Name "function_declaration_pattern");
     |];
   );
   "semgrep_expression",
@@ -12768,6 +12787,38 @@ let trans_method_pattern ((kind, body) : mt) : CST.method_pattern =
 
 
 
+let trans_function_declaration_pattern ((kind, body) : mt) : CST.function_declaration_pattern =
+  match body with
+  | Children v ->
+      (match v with
+      | Seq [v0; v1; v2; v3; v4; v5] ->
+          (
+            Run.opt
+              (fun v -> Run.trans_token (Run.matcher_token v))
+              v0
+            ,
+            Run.trans_token (Run.matcher_token v1),
+            (match v2 with
+            | Alt (0, v) ->
+                `Id (
+                  trans_identifier (Run.matcher_token v)
+                )
+            | Alt (1, v) ->
+                `Semg_ellips (
+                  trans_semgrep_ellipsis (Run.matcher_token v)
+                )
+            | _ -> assert false
+            )
+            ,
+            trans_call_signature (Run.matcher_token v3),
+            trans_statement_block (Run.matcher_token v4),
+            Run.opt
+              (fun v -> trans_automatic_semicolon (Run.matcher_token v))
+              v5
+          )
+      | _ -> assert false
+      )
+  | Leaf _ -> assert false
 
 
 
@@ -12790,6 +12841,10 @@ let trans_semgrep_pattern ((kind, body) : mt) : CST.semgrep_pattern =
       | Alt (2, v) ->
           `Meth_pat (
             trans_method_pattern (Run.matcher_token v)
+          )
+      | Alt (3, v) ->
+          `Func_decl_pat (
+            trans_function_declaration_pattern (Run.matcher_token v)
           )
       | _ -> assert false
       )

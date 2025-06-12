@@ -4314,6 +4314,36 @@ let map_semgrep_pattern (env : env) (x : CST.semgrep_pattern) =
   | `Meth_pat x -> R.Case ("Meth_pat",
       map_method_pattern env x
     )
+  | `Func_decl_pat (v1, v2, v3, v4, v5, v6) -> R.Case ("Func_decl_pat",
+      let v1 =
+        (match v1 with
+        | Some tok -> R.Option (Some (
+            (* "async" *) token env tok
+          ))
+        | None -> R.Option None)
+      in
+      let v2 = (* "function" *) token env v2 in
+      let v3 =
+        (match v3 with
+        | `Id tok -> R.Case ("Id",
+            (* identifier *) token env tok
+          )
+        | `Semg_ellips tok -> R.Case ("Semg_ellips",
+            (* "..." *) token env tok
+          )
+        )
+      in
+      let v4 = map_call_signature_ env v4 in
+      let v5 = map_statement_block env v5 in
+      let v6 =
+        (match v6 with
+        | Some tok -> R.Option (Some (
+            (* automatic_semicolon *) token env tok
+          ))
+        | None -> R.Option None)
+      in
+      R.Tuple [v1; v2; v3; v4; v5; v6]
+    )
   )
 
 let map_program (env : env) (x : CST.program) =
