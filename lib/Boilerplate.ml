@@ -2339,46 +2339,49 @@ and map_for_statement (env : env) ((v1, v2, v3, v4, v5) : CST.for_statement) =
     | `Semg_ellips tok -> R.Case ("Semg_ellips",
         (* "..." *) token env tok
       )
-    | `Choice_choice_lexi_decl x -> R.Case ("Choice_choice_lexi_decl",
-        (match x with
-        | `Choice_lexi_decl x -> R.Case ("Choice_lexi_decl",
-            (match x with
-            | `Lexi_decl x -> R.Case ("Lexi_decl",
-                map_lexical_declaration env x
-              )
-            | `Var_decl x -> R.Case ("Var_decl",
-                map_variable_declaration env x
+    | `Choice_choice_lexi_decl_choice_choice_exp_SEMI_opt_choice_exp (v1, v2, v3) -> R.Case ("Choice_choice_lexi_decl_choice_choice_exp_SEMI_opt_choice_exp",
+        let v1 =
+          (match v1 with
+          | `Choice_lexi_decl x -> R.Case ("Choice_lexi_decl",
+              (match x with
+              | `Lexi_decl x -> R.Case ("Lexi_decl",
+                  map_lexical_declaration env x
+                )
+              | `Var_decl x -> R.Case ("Var_decl",
+                  map_variable_declaration env x
+                )
               )
             )
+          | `Choice_exp_SEMI (v1, v2) -> R.Case ("Choice_exp_SEMI",
+              let v1 = map_expressions env v1 in
+              let v2 = (* ";" *) token env v2 in
+              R.Tuple [v1; v2]
+            )
+          | `Empty_stmt tok -> R.Case ("Empty_stmt",
+              (* ";" *) token env tok
+            )
           )
-        | `Choice_exp_SEMI (v1, v2) -> R.Case ("Choice_exp_SEMI",
-            let v1 = map_expressions env v1 in
-            let v2 = (* ";" *) token env v2 in
-            R.Tuple [v1; v2]
+        in
+        let v2 =
+          (match v2 with
+          | `Choice_exp_SEMI (v1, v2) -> R.Case ("Choice_exp_SEMI",
+              let v1 = map_expressions env v1 in
+              let v2 = (* ";" *) token env v2 in
+              R.Tuple [v1; v2]
+            )
+          | `Empty_stmt tok -> R.Case ("Empty_stmt",
+              (* ";" *) token env tok
+            )
           )
-        | `Empty_stmt tok -> R.Case ("Empty_stmt",
-            (* ";" *) token env tok
-          )
-        )
-      )
-    | `Choice_choice_exp_SEMI x -> R.Case ("Choice_choice_exp_SEMI",
-        (match x with
-        | `Choice_exp_SEMI (v1, v2) -> R.Case ("Choice_exp_SEMI",
-            let v1 = map_expressions env v1 in
-            let v2 = (* ";" *) token env v2 in
-            R.Tuple [v1; v2]
-          )
-        | `Empty_stmt tok -> R.Case ("Empty_stmt",
-            (* ";" *) token env tok
-          )
-        )
-      )
-    | `Opt_choice_exp opt -> R.Case ("Opt_choice_exp",
-        (match opt with
-        | Some x -> R.Option (Some (
-            map_expressions env x
-          ))
-        | None -> R.Option None)
+        in
+        let v3 =
+          (match v3 with
+          | Some x -> R.Option (Some (
+              map_expressions env x
+            ))
+          | None -> R.Option None)
+        in
+        R.Tuple [v1; v2; v3]
       )
     )
   in

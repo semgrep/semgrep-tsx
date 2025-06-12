@@ -1608,36 +1608,38 @@ let children_regexps : (string * Run.exp option) list = [
       Token (Literal "(");
       Alt [|
         Token (Name "semgrep_ellipsis");
-        Alt [|
+        Seq [
           Alt [|
-            Token (Name "lexical_declaration");
-            Token (Name "variable_declaration");
+            Alt [|
+              Token (Name "lexical_declaration");
+              Token (Name "variable_declaration");
+            |];
+            Seq [
+              Alt [|
+                Token (Name "expression");
+                Token (Name "sequence_expression");
+              |];
+              Token (Literal ";");
+            ];
+            Token (Name "empty_statement");
           |];
-          Seq [
+          Alt [|
+            Seq [
+              Alt [|
+                Token (Name "expression");
+                Token (Name "sequence_expression");
+              |];
+              Token (Literal ";");
+            ];
+            Token (Name "empty_statement");
+          |];
+          Opt (
             Alt [|
               Token (Name "expression");
               Token (Name "sequence_expression");
             |];
-            Token (Literal ";");
-          ];
-          Token (Name "empty_statement");
-        |];
-        Alt [|
-          Seq [
-            Alt [|
-              Token (Name "expression");
-              Token (Name "sequence_expression");
-            |];
-            Token (Literal ";");
-          ];
-          Token (Name "empty_statement");
-        |];
-        Opt (
-          Alt [|
-            Token (Name "expression");
-            Token (Name "sequence_expression");
-          |];
-        );
+          );
+        ];
       |];
       Token (Literal ")");
       Token (Name "statement");
@@ -7629,100 +7631,102 @@ and trans_for_statement ((kind, body) : mt) : CST.for_statement =
                   trans_semgrep_ellipsis (Run.matcher_token v)
                 )
             | Alt (1, v) ->
-                `Choice_choice_lexi_decl (
+                `Choice_choice_lexi_decl_choice_choice_exp_SEMI_opt_choice_exp (
                   (match v with
-                  | Alt (0, v) ->
-                      `Choice_lexi_decl (
-                        (match v with
+                  | Seq [v0; v1; v2] ->
+                      (
+                        (match v0 with
                         | Alt (0, v) ->
-                            `Lexi_decl (
-                              trans_lexical_declaration (Run.matcher_token v)
+                            `Choice_lexi_decl (
+                              (match v with
+                              | Alt (0, v) ->
+                                  `Lexi_decl (
+                                    trans_lexical_declaration (Run.matcher_token v)
+                                  )
+                              | Alt (1, v) ->
+                                  `Var_decl (
+                                    trans_variable_declaration (Run.matcher_token v)
+                                  )
+                              | _ -> assert false
+                              )
                             )
                         | Alt (1, v) ->
-                            `Var_decl (
-                              trans_variable_declaration (Run.matcher_token v)
-                            )
-                        | _ -> assert false
-                        )
-                      )
-                  | Alt (1, v) ->
-                      `Choice_exp_SEMI (
-                        (match v with
-                        | Seq [v0; v1] ->
-                            (
-                              (match v0 with
-                              | Alt (0, v) ->
-                                  `Exp (
-                                    trans_expression (Run.matcher_token v)
-                                  )
-                              | Alt (1, v) ->
-                                  `Seq_exp (
-                                    trans_sequence_expression (Run.matcher_token v)
+                            `Choice_exp_SEMI (
+                              (match v with
+                              | Seq [v0; v1] ->
+                                  (
+                                    (match v0 with
+                                    | Alt (0, v) ->
+                                        `Exp (
+                                          trans_expression (Run.matcher_token v)
+                                        )
+                                    | Alt (1, v) ->
+                                        `Seq_exp (
+                                          trans_sequence_expression (Run.matcher_token v)
+                                        )
+                                    | _ -> assert false
+                                    )
+                                    ,
+                                    Run.trans_token (Run.matcher_token v1)
                                   )
                               | _ -> assert false
                               )
-                              ,
-                              Run.trans_token (Run.matcher_token v1)
+                            )
+                        | Alt (2, v) ->
+                            `Empty_stmt (
+                              trans_empty_statement (Run.matcher_token v)
                             )
                         | _ -> assert false
                         )
-                      )
-                  | Alt (2, v) ->
-                      `Empty_stmt (
-                        trans_empty_statement (Run.matcher_token v)
-                      )
-                  | _ -> assert false
-                  )
-                )
-            | Alt (2, v) ->
-                `Choice_choice_exp_SEMI (
-                  (match v with
-                  | Alt (0, v) ->
-                      `Choice_exp_SEMI (
-                        (match v with
-                        | Seq [v0; v1] ->
-                            (
-                              (match v0 with
-                              | Alt (0, v) ->
-                                  `Exp (
-                                    trans_expression (Run.matcher_token v)
-                                  )
-                              | Alt (1, v) ->
-                                  `Seq_exp (
-                                    trans_sequence_expression (Run.matcher_token v)
+                        ,
+                        (match v1 with
+                        | Alt (0, v) ->
+                            `Choice_exp_SEMI (
+                              (match v with
+                              | Seq [v0; v1] ->
+                                  (
+                                    (match v0 with
+                                    | Alt (0, v) ->
+                                        `Exp (
+                                          trans_expression (Run.matcher_token v)
+                                        )
+                                    | Alt (1, v) ->
+                                        `Seq_exp (
+                                          trans_sequence_expression (Run.matcher_token v)
+                                        )
+                                    | _ -> assert false
+                                    )
+                                    ,
+                                    Run.trans_token (Run.matcher_token v1)
                                   )
                               | _ -> assert false
                               )
-                              ,
-                              Run.trans_token (Run.matcher_token v1)
+                            )
+                        | Alt (1, v) ->
+                            `Empty_stmt (
+                              trans_empty_statement (Run.matcher_token v)
                             )
                         | _ -> assert false
                         )
-                      )
-                  | Alt (1, v) ->
-                      `Empty_stmt (
-                        trans_empty_statement (Run.matcher_token v)
+                        ,
+                        Run.opt
+                          (fun v ->
+                            (match v with
+                            | Alt (0, v) ->
+                                `Exp (
+                                  trans_expression (Run.matcher_token v)
+                                )
+                            | Alt (1, v) ->
+                                `Seq_exp (
+                                  trans_sequence_expression (Run.matcher_token v)
+                                )
+                            | _ -> assert false
+                            )
+                          )
+                          v2
                       )
                   | _ -> assert false
                   )
-                )
-            | Alt (3, v) ->
-                `Opt_choice_exp (
-                  Run.opt
-                    (fun v ->
-                      (match v with
-                      | Alt (0, v) ->
-                          `Exp (
-                            trans_expression (Run.matcher_token v)
-                          )
-                      | Alt (1, v) ->
-                          `Seq_exp (
-                            trans_sequence_expression (Run.matcher_token v)
-                          )
-                      | _ -> assert false
-                      )
-                    )
-                    v
                 )
             | _ -> assert false
             )
