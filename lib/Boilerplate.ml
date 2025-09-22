@@ -4336,8 +4336,16 @@ let map_semgrep_pattern (env : env) (x : CST.semgrep_pattern) =
   | `Exp x -> R.Case ("Exp",
       map_expression env x
     )
-  | `Pair x -> R.Case ("Pair",
-      map_pair env x
+  | `Pair_opt_choice_auto_semi (v1, v2) -> R.Case ("Pair_opt_choice_auto_semi",
+      let v1 = map_pair env v1 in
+      let v2 =
+        (match v2 with
+        | Some x -> R.Option (Some (
+            map_semicolon env x
+          ))
+        | None -> R.Option None)
+      in
+      R.Tuple [v1; v2]
     )
   | `Meth_pat x -> R.Case ("Meth_pat",
       map_method_pattern env x

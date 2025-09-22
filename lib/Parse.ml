@@ -3706,7 +3706,15 @@ let children_regexps : (string * Run.exp option) list = [
   Some (
     Alt [|
       Token (Name "expression");
-      Token (Name "pair");
+      Seq [
+        Token (Name "pair");
+        Opt (
+          Alt [|
+            Token (Name "automatic_semicolon");
+            Token (Literal ";");
+          |];
+        );
+      ];
       Token (Name "method_pattern");
       Token (Name "function_declaration_pattern");
       Token (Name "finally_clause");
@@ -12950,8 +12958,29 @@ let trans_semgrep_pattern ((kind, body) : mt) : CST.semgrep_pattern =
             trans_expression (Run.matcher_token v)
           )
       | Alt (1, v) ->
-          `Pair (
-            trans_pair (Run.matcher_token v)
+          `Pair_opt_choice_auto_semi (
+            (match v with
+            | Seq [v0; v1] ->
+                (
+                  trans_pair (Run.matcher_token v0),
+                  Run.opt
+                    (fun v ->
+                      (match v with
+                      | Alt (0, v) ->
+                          `Auto_semi (
+                            trans_automatic_semicolon (Run.matcher_token v)
+                          )
+                      | Alt (1, v) ->
+                          `SEMI (
+                            Run.trans_token (Run.matcher_token v)
+                          )
+                      | _ -> assert false
+                      )
+                    )
+                    v1
+                )
+            | _ -> assert false
+            )
           )
       | Alt (2, v) ->
           `Meth_pat (
