@@ -18,13 +18,13 @@ type mt = Run.matcher_token
 external create_parser :
   unit -> Tree_sitter_API.ts_parser = "octs_create_parser_tsx"
 
-let parse_source_string ?src_file contents =
+let parse_source_string ?timeout_micros ?src_file contents =
   let ts_parser = create_parser () in
-  Tree_sitter_parsing.parse_source_string ?src_file ts_parser contents
+  Tree_sitter_parsing.parse_source_string ?timeout_micros ?src_file ts_parser contents
 
-let parse_source_file src_file =
+let parse_source_file ?timeout_micros src_file =
   let ts_parser = create_parser () in
-  Tree_sitter_parsing.parse_source_file ts_parser src_file
+  Tree_sitter_parsing.parse_source_file ?timeout_micros ts_parser src_file
 
 let extras = [
   "comment";
@@ -3709,7 +3709,10 @@ let children_regexps : (string * Run.exp option) list = [
       Seq [
         Token (Name "pair");
         Opt (
-          Token (Literal ",");
+          Alt [|
+            Token (Name "automatic_semicolon");
+            Token (Literal ";");
+          |];
         );
       ];
       Token (Name "method_pattern");
@@ -12955,13 +12958,25 @@ let trans_semgrep_pattern ((kind, body) : mt) : CST.semgrep_pattern =
             trans_expression (Run.matcher_token v)
           )
       | Alt (1, v) ->
-          `Pair_opt_COMMA (
+          `Pair_opt_choice_auto_semi (
             (match v with
             | Seq [v0; v1] ->
                 (
                   trans_pair (Run.matcher_token v0),
                   Run.opt
-                    (fun v -> Run.trans_token (Run.matcher_token v))
+                    (fun v ->
+                      (match v with
+                      | Alt (0, v) ->
+                          `Auto_semi (
+                            trans_automatic_semicolon (Run.matcher_token v)
+                          )
+                      | Alt (1, v) ->
+                          `SEMI (
+                            Run.trans_token (Run.matcher_token v)
+                          )
+                      | _ -> assert false
+                      )
+                    )
                     v1
                 )
             | _ -> assert false
@@ -13084,11 +13099,11 @@ let parse_input_tree input_tree =
   in
   Parsing_result.create src opt_program extras errors
 
-let string ?src_file contents =
-  let input_tree = parse_source_string ?src_file contents in
+let string ?timeout_micros ?src_file contents =
+  let input_tree = parse_source_string ?timeout_micros ?src_file contents in
   parse_input_tree input_tree
 
-let file src_file =
-  let input_tree = parse_source_file src_file in
+let file ?timeout_micros src_file =
+  let input_tree = parse_source_file ?timeout_micros src_file in
   parse_input_tree input_tree
 
