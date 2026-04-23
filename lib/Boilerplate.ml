@@ -1828,37 +1828,8 @@ and map_default_type (env : env) ((v1, v2) : CST.default_type) =
 
 and map_destructuring_pattern (env : env) (x : CST.destructuring_pattern) =
   (match x with
-  | `Obj_pat (v1, v2, v3) -> R.Case ("Obj_pat",
-      let v1 = (* "{" *) token env v1 in
-      let v2 =
-        (match v2 with
-        | Some (v1, v2) -> R.Option (Some (
-            let v1 =
-              (match v1 with
-              | Some x -> R.Option (Some (
-                  map_anon_choice_pair_pat_3ff9cbe env x
-                ))
-              | None -> R.Option None)
-            in
-            let v2 =
-              R.List (List.map (fun (v1, v2) ->
-                let v1 = (* "," *) token env v1 in
-                let v2 =
-                  (match v2 with
-                  | Some x -> R.Option (Some (
-                      map_anon_choice_pair_pat_3ff9cbe env x
-                    ))
-                  | None -> R.Option None)
-                in
-                R.Tuple [v1; v2]
-              ) v2)
-            in
-            R.Tuple [v1; v2]
-          ))
-        | None -> R.Option None)
-      in
-      let v3 = (* "}" *) token env v3 in
-      R.Tuple [v1; v2; v3]
+  | `Obj_pat x -> R.Case ("Obj_pat",
+      map_object_pattern env x
     )
   | `Array_pat (v1, v2, v3) -> R.Case ("Array_pat",
       let v1 = (* "[" *) token env v1 in
@@ -3111,6 +3082,38 @@ and map_object_ (env : env) ((v1, v2, v3) : CST.object_) =
               (match v2 with
               | Some x -> R.Option (Some (
                   map_anon_choice_pair_20c9acd env x
+                ))
+              | None -> R.Option None)
+            in
+            R.Tuple [v1; v2]
+          ) v2)
+        in
+        R.Tuple [v1; v2]
+      ))
+    | None -> R.Option None)
+  in
+  let v3 = (* "}" *) token env v3 in
+  R.Tuple [v1; v2; v3]
+
+and map_object_pattern (env : env) ((v1, v2, v3) : CST.object_pattern) =
+  let v1 = (* "{" *) token env v1 in
+  let v2 =
+    (match v2 with
+    | Some (v1, v2) -> R.Option (Some (
+        let v1 =
+          (match v1 with
+          | Some x -> R.Option (Some (
+              map_anon_choice_pair_pat_3ff9cbe env x
+            ))
+          | None -> R.Option None)
+        in
+        let v2 =
+          R.List (List.map (fun (v1, v2) ->
+            let v1 = (* "," *) token env v1 in
+            let v2 =
+              (match v2 with
+              | Some x -> R.Option (Some (
+                  map_anon_choice_pair_pat_3ff9cbe env x
                 ))
               | None -> R.Option None)
             in
@@ -4400,6 +4403,9 @@ let map_semgrep_pattern (env : env) (x : CST.semgrep_pattern) =
       let v5 = map_call_signature_ env v5 in
       let v6 = map_statement_block env v6 in
       R.Tuple [v1; v2; v3; v4; v5; v6]
+    )
+  | `Obj_pat x -> R.Case ("Obj_pat",
+      map_object_pattern env x
     )
   )
 
