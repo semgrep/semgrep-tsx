@@ -398,7 +398,7 @@ and anon_choice_exp_9818c1b = [
   | `Spread_elem of spread_element
 ]
 
-and anon_choice_export_stmt_f90d83f = [
+and anon_choice_export_stmt_b35802f = [
     `Export_stmt of export_statement
   | `Prop_sign of (
         accessibility_modifier option
@@ -419,6 +419,7 @@ and anon_choice_export_stmt_f90d83f = [
     )
   | `Index_sign of index_signature
   | `Meth_sign of method_signature
+  | `Semg_ellips of Token.t (* "..." *)
 ]
 
 and anon_choice_import_c99ceb4 = [
@@ -462,9 +463,10 @@ and anon_choice_pat_3297d92 = [
   | `Assign_pat of (pattern * Token.t (* "=" *) * expression)
 ]
 
-and anon_choice_prop_name_6cc9e4b = [
+and anon_choice_prop_name_263cfab = [
     `Prop_name of property_name
   | `Enum_assign of (property_name * initializer_)
+  | `Semg_ellips of Token.t (* "..." *)
 ]
 
 and anon_choice_type_id_43e1312 = [
@@ -484,6 +486,16 @@ and anon_choice_type_id_a85f573 = [
     `Id of identifier (*tok*)
   | `Nested_type_id of nested_type_identifier
   | `Gene_type of generic_type
+]
+
+and anon_choice_type_param_61809f5 = [
+    `Type_param of (
+        Token.t (* "const" *) option
+      * identifier (*tok*)
+      * constraint_ option
+      * default_type option
+    )
+  | `Semg_ellips of Token.t (* "..." *)
 ]
 
 and anon_opt_choice_jsx_attr_name_rep_jsx_attr__8497dc0 =
@@ -512,6 +524,8 @@ and array_ = (
   * anon_opt_opt_choice_exp_rep_COMMA_opt_choice_exp_208ebb4
   * Token.t (* "]" *)
 )
+
+and array_type = (primary_type * Token.t (* "[" *) * Token.t (* "]" *))
 
 and arrow_function = (
     Token.t (* "async" *) option
@@ -681,6 +695,11 @@ and class_heritage = [
   | `Imples_clause of implements_clause
 ]
 
+and conditional_type = (
+    type_ * Token.t (* "extends" *) * type_ * Token.t (* "?" *) * type_
+  * Token.t (* ":" *) * type_
+)
+
 and constraint_ = (
     [ `Extends of Token.t (* "extends" *) | `COLON of Token.t (* ":" *) ]
   * type_
@@ -783,7 +802,16 @@ and decorator_parenthesized_expression = (
 and default_type = (Token.t (* "=" *) * type_)
 
 and destructuring_pattern = [
-    `Obj_pat of object_pattern
+    `Obj_pat of (
+        Token.t (* "{" *)
+      * (
+            anon_choice_pair_pat_3ff9cbe option
+          * (Token.t (* "," *) * anon_choice_pair_pat_3ff9cbe option)
+              list (* zero or more *)
+        )
+          option
+      * Token.t (* "}" *)
+    )
   | `Array_pat of (
         Token.t (* "[" *)
       * (
@@ -809,8 +837,8 @@ and else_clause = (Token.t (* "else" *) * statement)
 and enum_body = (
     Token.t (* "{" *)
   * (
-        anon_choice_prop_name_6cc9e4b
-      * (Token.t (* "," *) * anon_choice_prop_name_6cc9e4b)
+        anon_choice_prop_name_263cfab
+      * (Token.t (* "," *) * anon_choice_prop_name_263cfab)
           list (* zero or more *)
       * Token.t (* "," *) option
     )
@@ -950,6 +978,8 @@ and extends_type_clause = (
 )
 
 and finally_clause = (Token.t (* "finally" *) * statement_block)
+
+and flow_maybe_type = (Token.t (* "?" *) * primary_type)
 
 and for_header = (
     Token.t (* "(" *)
@@ -1121,6 +1151,8 @@ and index_signature = (
     ]
 )
 
+and index_type_query = (Token.t (* "keyof" *) * primary_type)
+
 and infer_type = (
     Token.t (* "infer" *)
   * identifier (*tok*)
@@ -1130,6 +1162,8 @@ and infer_type = (
 and initializer_ = (Token.t (* "=" *) * expression)
 
 and internal_module = (Token.t (* "namespace" *) * module__)
+
+and intersection_type = (type_ option * Token.t (* "&" *) * type_)
 
 and jsx_attribute = (
     jsx_attribute_name
@@ -1215,6 +1249,10 @@ and lhs_expression = [
   | `Non_null_exp of non_null_expression
 ]
 
+and lookup_type = (
+    primary_type * Token.t (* "[" *) * type_ * Token.t (* "]" *)
+)
+
 and mapped_type_clause = (
     identifier (*tok*)
   * Token.t (* "in" *)
@@ -1290,23 +1328,12 @@ and object_ = (
   * Token.t (* "}" *)
 )
 
-and object_pattern = (
-    Token.t (* "{" *)
-  * (
-        anon_choice_pair_pat_3ff9cbe option
-      * (Token.t (* "," *) * anon_choice_pair_pat_3ff9cbe option)
-          list (* zero or more *)
-    )
-      option
-  * Token.t (* "}" *)
-)
-
 and object_type = (
     [ `LCURL of Token.t (* "{" *) | `LCURLBAR of Token.t (* "{|" *) ]
   * (
         [ `COMMA of Token.t (* "," *) | `SEMI of Token.t (* ";" *) ] option
-      * anon_choice_export_stmt_f90d83f
-      * (anon_choice_COMMA_5194cb4 * anon_choice_export_stmt_f90d83f)
+      * anon_choice_export_stmt_b35802f
+      * (anon_choice_COMMA_5194cb4 * anon_choice_export_stmt_b35802f)
           list (* zero or more *)
       * anon_choice_COMMA_5194cb4 option
     )
@@ -1346,6 +1373,8 @@ and parenthesized_expression = (
     ]
   * Token.t (* ")" *)
 )
+
+and parenthesized_type = (Token.t (* "(" *) * type_ * Token.t (* ")" *))
 
 and pattern = [
     `Choice_choice_choice_member_exp of [
@@ -1391,58 +1420,31 @@ and primary_expression = [
 ]
 
 and primary_type = [
-    `Paren_type of (Token.t (* "(" *) * type_ * Token.t (* ")" *))
-  | `Pred_type of predefined_type
-  | `Id of identifier (*tok*)
-  | `Nested_type_id of nested_type_identifier
-  | `Gene_type of generic_type
-  | `Obj_type of object_type
-  | `Array_type of (primary_type * Token.t (* "[" *) * Token.t (* "]" *))
-  | `Tuple_type of (
-        Token.t (* "[" *)
-      * (
-            tuple_type_member
-          * (Token.t (* "," *) * tuple_type_member) list (* zero or more *)
-        )
-          option
-      * Token.t (* "," *) option
-      * Token.t (* "]" *)
-    )
-  | `Flow_maybe_type of (Token.t (* "?" *) * primary_type)
-  | `Type_query of (
-        Token.t (* "typeof" *)
-      * [
-            `Type_query_subs_exp of type_query_subscript_expression
-          | `Type_query_member_exp of type_query_member_expression
-          | `Type_query_call_exp of type_query_call_expression
-          | `Type_query_inst_exp of type_query_instantiation_expression
-          | `Id of identifier (*tok*)
-          | `This of Token.t (* "this" *)
-        ]
-    )
-  | `Index_type_query of (Token.t (* "keyof" *) * primary_type)
-  | `This of Token.t (* "this" *)
-  | `Exis_type of Token.t (* "*" *)
-  | `Lit_type of literal_type
-  | `Lookup_type of (
-        primary_type * Token.t (* "[" *) * type_ * Token.t (* "]" *)
-    )
-  | `Cond_type of (
-        type_ * Token.t (* "extends" *) * type_ * Token.t (* "?" *) * type_
-      * Token.t (* ":" *) * type_
-    )
-  | `Temp_lit_type of (
-        Token.t (* "`" *)
-      * [
-            `Temp_chars of template_chars (*tok*)
-          | `Temp_type of template_type
-        ]
-          list (* zero or more *)
-      * Token.t (* "`" *)
-    )
-  | `Inte_type of (type_ option * Token.t (* "&" *) * type_)
-  | `Union_type of (type_ option * Token.t (* "|" *) * type_)
-  | `Const of Token.t (* "const" *)
+    `Choice_paren_type of [
+        `Paren_type of parenthesized_type
+      | `Pred_type of predefined_type
+      | `Id of identifier (*tok*)
+      | `Nested_type_id of nested_type_identifier
+      | `Gene_type of generic_type
+      | `Obj_type of object_type
+      | `Array_type of array_type
+      | `Tuple_type of tuple_type
+      | `Flow_maybe_type of flow_maybe_type
+      | `Type_query of type_query
+      | `Index_type_query of index_type_query
+      | `This of Token.t (* "this" *)
+      | `Exis_type of Token.t (* "*" *)
+      | `Lit_type of literal_type
+      | `Lookup_type of lookup_type
+      | `Cond_type of conditional_type
+      | `Temp_lit_type of template_literal_type
+      | `Inte_type of intersection_type
+      | `Union_type of union_type
+      | `Const of Token.t (* "const" *)
+    ]
+  | `Semg_ellips of Token.t (* "..." *)
+  | `Semg_meta of semgrep_metavariable (*tok*)
+  | `Semg_meta_ellips of semgrep_metavar_ellipsis (*tok*)
 ]
 
 and property_name = [
@@ -1568,6 +1570,13 @@ and switch_statement = (
     Token.t (* "switch" *) * parenthesized_expression * switch_body
 )
 
+and template_literal_type = (
+    Token.t (* "`" *)
+  * [ `Temp_chars of template_chars (*tok*) | `Temp_type of template_type ]
+      list (* zero or more *)
+  * Token.t (* "`" *)
+)
+
 and template_string = (
     Token.t (* "`" *)
   * [
@@ -1596,6 +1605,17 @@ and try_statement = (
   * statement_block
   * catch_clause option
   * finally_clause option
+)
+
+and tuple_type = (
+    Token.t (* "[" *)
+  * (
+        tuple_type_member
+      * (Token.t (* "," *) * tuple_type_member) list (* zero or more *)
+    )
+      option
+  * Token.t (* "," *) option
+  * Token.t (* "]" *)
 )
 
 and tuple_type_member = [
@@ -1649,17 +1669,11 @@ and type_arguments = (
   * Token.t (* ">" *)
 )
 
-and type_parameter = (
-    Token.t (* "const" *) option
-  * identifier (*tok*)
-  * constraint_ option
-  * default_type option
-)
-
 and type_parameters = (
     Token.t (* "<" *)
-  * type_parameter
-  * (Token.t (* "," *) * type_parameter) list (* zero or more *)
+  * anon_choice_type_param_61809f5
+  * (Token.t (* "," *) * anon_choice_type_param_61809f5)
+      list (* zero or more *)
   * Token.t (* "," *) option
   * Token.t (* ">" *)
 )
@@ -1675,6 +1689,18 @@ and type_predicate = (
 )
 
 and type_predicate_annotation = (Token.t (* ":" *) * type_predicate)
+
+and type_query = (
+    Token.t (* "typeof" *)
+  * [
+        `Type_query_subs_exp of type_query_subscript_expression
+      | `Type_query_member_exp of type_query_member_expression
+      | `Type_query_call_exp of type_query_call_expression
+      | `Type_query_inst_exp of type_query_instantiation_expression
+      | `Id of identifier (*tok*)
+      | `This of Token.t (* "this" *)
+    ]
+)
 
 and type_query_call_expression = (anon_choice_import_c99ceb4 * arguments)
 
@@ -1720,6 +1746,8 @@ and type_query_subscript_expression = (
     ]
   * Token.t (* "]" *)
 )
+
+and union_type = (type_ option * Token.t (* "|" *) * type_)
 
 and update_expression = [
     `Exp_choice_PLUSPLUS of (expression * anon_choice_PLUSPLUS_e498e28)
@@ -1793,7 +1821,10 @@ type semgrep_pattern = [
       * call_signature_
       * statement_block
     )
-  | `Obj_pat of object_pattern
+  | `Deco of decorator
+  | `Stmt of statement
+  | `Type of type_
+  | `Type_pred of type_predicate
 ]
 
 type program = [
@@ -1877,10 +1908,6 @@ type array_pattern (* inlined *) = (
   * Token.t (* "]" *)
 )
 
-type array_type (* inlined *) = (
-    primary_type * Token.t (* "[" *) * Token.t (* "]" *)
-)
-
 type as_expression (* inlined *) = (
     expression
   * Token.t (* "as" *)
@@ -1929,11 +1956,6 @@ type computed_property_name (* inlined *) = (
     Token.t (* "[" *) * expression * Token.t (* "]" *)
 )
 
-type conditional_type (* inlined *) = (
-    type_ * Token.t (* "extends" *) * type_ * Token.t (* "?" *) * type_
-  * Token.t (* ":" *) * type_
-)
-
 type construct_signature (* inlined *) = (
     Token.t (* "abstract" *) option
   * Token.t (* "new" *)
@@ -1964,8 +1986,6 @@ type enum_declaration (* inlined *) = (
   * enum_body
 )
 
-type flow_maybe_type (* inlined *) = (Token.t (* "?" *) * primary_type)
-
 type function_signature (* inlined *) = (
     Token.t (* "async" *) option
   * Token.t (* "function" *)
@@ -1985,8 +2005,6 @@ type function_type (* inlined *) = (
   * [ `Type of type_ | `Asserts of asserts | `Type_pred of type_predicate ]
 )
 
-type index_type_query (* inlined *) = (Token.t (* "keyof" *) * primary_type)
-
 type instantiation_expression (* inlined *) = (expression * type_arguments)
 
 type interface_declaration (* inlined *) = (
@@ -1995,12 +2013,6 @@ type interface_declaration (* inlined *) = (
   * type_parameters option
   * extends_type_clause option
   * object_type
-)
-
-type intersection_type (* inlined *) = (
-    type_ option
-  * Token.t (* "&" *)
-  * type_
 )
 
 type jsx_element (* inlined *) = (
@@ -2014,10 +2026,6 @@ type jsx_self_closing_element (* inlined *) = (
   * Token.t (* "/>" *)
 )
 
-type lookup_type (* inlined *) = (
-    primary_type * Token.t (* "[" *) * type_ * Token.t (* "]" *)
-)
-
 type module_ (* inlined *) = (Token.t (* "module" *) * module__)
 
 type object_assignment_pattern (* inlined *) = (
@@ -2027,6 +2035,17 @@ type object_assignment_pattern (* inlined *) = (
     ]
   * Token.t (* "=" *)
   * expression
+)
+
+type object_pattern (* inlined *) = (
+    Token.t (* "{" *)
+  * (
+        anon_choice_pair_pat_3ff9cbe option
+      * (Token.t (* "," *) * anon_choice_pair_pat_3ff9cbe option)
+          list (* zero or more *)
+    )
+      option
+  * Token.t (* "}" *)
 )
 
 type optional_parameter (* inlined *) = (
@@ -2041,10 +2060,6 @@ type optional_tuple_parameter (* inlined *) = (
 )
 
 type optional_type (* inlined *) = (type_ * Token.t (* "?" *))
-
-type parenthesized_type (* inlined *) = (
-    Token.t (* "(" *) * type_ * Token.t (* ")" *)
-)
 
 type property_signature (* inlined *) = (
     accessibility_modifier option
@@ -2070,13 +2085,6 @@ type satisfies_expression (* inlined *) = (
     expression * Token.t (* "satisfies" *) * type_
 )
 
-type template_literal_type (* inlined *) = (
-    Token.t (* "`" *)
-  * [ `Temp_chars of template_chars (*tok*) | `Temp_type of template_type ]
-      list (* zero or more *)
-  * Token.t (* "`" *)
-)
-
 type ternary_expression (* inlined *) = (
     expression * ternary_qmark (*tok*) * expression * Token.t (* ":" *)
   * expression
@@ -2085,17 +2093,6 @@ type ternary_expression (* inlined *) = (
 type tuple_parameter (* inlined *) = (
     [ `Id of identifier (*tok*) | `Rest_pat of rest_pattern ]
   * type_annotation
-)
-
-type tuple_type (* inlined *) = (
-    Token.t (* "[" *)
-  * (
-        tuple_type_member
-      * (Token.t (* "," *) * tuple_type_member) list (* zero or more *)
-    )
-      option
-  * Token.t (* "," *) option
-  * Token.t (* "]" *)
 )
 
 type type_alias_declaration (* inlined *) = (
@@ -2107,16 +2104,11 @@ type type_alias_declaration (* inlined *) = (
   * semicolon
 )
 
-type type_query (* inlined *) = (
-    Token.t (* "typeof" *)
-  * [
-        `Type_query_subs_exp of type_query_subscript_expression
-      | `Type_query_member_exp of type_query_member_expression
-      | `Type_query_call_exp of type_query_call_expression
-      | `Type_query_inst_exp of type_query_instantiation_expression
-      | `Id of identifier (*tok*)
-      | `This of Token.t (* "this" *)
-    ]
+type type_parameter (* inlined *) = (
+    Token.t (* "const" *) option
+  * identifier (*tok*)
+  * constraint_ option
+  * default_type option
 )
 
 type unary_expression (* inlined *) = (
@@ -2131,8 +2123,6 @@ type unary_expression (* inlined *) = (
     ]
   * expression
 )
-
-type union_type (* inlined *) = (type_ option * Token.t (* "|" *) * type_)
 
 type yield_expression (* inlined *) = (
     Token.t (* "yield" *)
